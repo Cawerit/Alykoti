@@ -23,6 +23,10 @@ import com.vaadin.ui.VerticalLayout;
 public class AlykotiUI extends UI {
 
 	static Navigator navigator;
+	//tyyppiturvallisuuden takia:
+	protected static final String ADMINTOP = "adminTop";
+	protected static final String HOMES = "homes";
+	protected static final String USERS = "users";
 	
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class)
@@ -31,46 +35,20 @@ public class AlykotiUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
-	
+		
 		navigator = new Navigator(this, this);
 		navigator.addView("", new LoginView());
-		navigator.addView("main", new MainView());
+		navigator.addView(ADMINTOP, new AdminTopView());
+		navigator.addView(HOMES, new HomesView());
+		navigator.addView(USERS, new UsersView());
+		
+		
 		setContent(new LoginView());
+
 		}
 	
-    static public class LoginView extends VerticalLayout implements View {
-        public static final String NAME = "";
-        
-        public LoginView() {
-            TextField username = new TextField();
-            PasswordField password = new PasswordField();
-            Button loginButton = new Button("login");
-            username.setValue("username");
-            password.setValue("username");
-
-            loginButton.addClickListener(click -> navigator.navigateTo("main"));
-            
-            Notification.show("Heippahei");
-            addComponent(username);
-            addComponent(password);
-            addComponent(loginButton);
-        }
-
-		@Override
-		public void enter(ViewChangeEvent event) {
-			
-		}        
-    }
-    static public class MainView extends VerticalLayout implements View{
-    	public MainView(){ 
-    		addComponent(new Label("NONII"));
-    	}
-
-		@Override
-		public void enter(ViewChangeEvent event) {
-			System.out.println("Nyt kutsuttiin MainView.enter()");
-			
-		}
-    }
+  
     
 }
+
+
