@@ -14,7 +14,7 @@ public class HomesView extends VerticalLayout implements View {
         
     public HomesView() {
     	setSizeFull();
-    	menu.addComponent(new Button("Koti1", new ButtonListener("koti1")));
+    	//menu.addComponent(new Button("Koti1", new ButtonListener("koti1")));
     	
     }
     
