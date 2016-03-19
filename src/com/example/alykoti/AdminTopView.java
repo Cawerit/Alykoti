@@ -15,16 +15,21 @@ public class AdminTopView extends HorizontalLayout implements View {
 		Notification.show("Welcome!");
         Button homes = new Button("Homes");
         Button users = new Button("Users");
-
+        Button logout = new Button("Logout");
+        
         homes.setWidth("50%");
         users.setWidth("50%");
         homes.setHeight("150px");
         users.setHeight("150px");
        	addComponent(homes);
        	addComponent(users);
+       	addComponent(logout);
+       	homes.setDescription("Manage homes");
+       	users.setDescription("Manage users");
         
         setComponentAlignment(homes, Alignment.MIDDLE_CENTER);
         setComponentAlignment(users, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(logout, Alignment.TOP_RIGHT);
 
         homes.addClickListener(click -> AlykotiUI.navigator.navigateTo(AlykotiUI.HOMES));
         users.addClickListener(click -> AlykotiUI.navigator.navigateTo(AlykotiUI.USERS));

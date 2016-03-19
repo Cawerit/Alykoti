@@ -31,6 +31,7 @@ public class AlykotiUI extends UI {
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class)
 	public static class Servlet extends VaadinServlet {
+	
 	}
 
 	@Override
@@ -39,8 +40,9 @@ public class AlykotiUI extends UI {
 		navigator = new Navigator(this, this);
 		navigator.addView("", new LoginView());
 		navigator.addView(ADMINTOP, new AdminTopView());
-		navigator.addView(HOMES, new HomesView());
+		navigator.addView(HOMES, new HomesView(ADMINTOP, HOMES));
 		navigator.addView(USERS, new UsersView());
+		
 		
 		
 		setContent(new LoginView());

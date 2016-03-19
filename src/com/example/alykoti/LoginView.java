@@ -24,10 +24,10 @@ public class LoginView extends VerticalLayout implements View {
         addComponent(username);
         addComponent(password);
         addComponent(loginButton);
-        setComponentAlignment(loginButton, Alignment.MIDDLE_CENTER);
+     
         setComponentAlignment(username, Alignment.MIDDLE_CENTER);
-        setComponentAlignment(password, Alignment.MIDDLE_CENTER);
-    
+        setComponentAlignment(password, Alignment.TOP_CENTER);
+        setComponentAlignment(loginButton, Alignment.TOP_CENTER);
     }
 
 	@Override
