@@ -8,9 +8,14 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Layout;
+import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -23,6 +28,7 @@ public class AdminTopView extends VerticalLayout implements View {
 	VerticalLayout content;
 	MenuItem homes;
 	MenuItem users;
+	Button logout;
 	
 	public AdminTopView() {
 		//palkki, jonka sisalla on menu ja logout-nappula
@@ -44,7 +50,7 @@ public class AdminTopView extends VerticalLayout implements View {
        	
 		bar.addComponent(menubar);
 		
-		Button logout = new Button("Logout");
+		logout = new Button("Logout");
 		logout.setIcon(FontAwesome.BACKWARD);
         logout.addClickListener(click -> AlykotiUI.NAVIGATOR.navigateTo(""));
         bar.addComponent(logout);
@@ -53,7 +59,6 @@ public class AdminTopView extends VerticalLayout implements View {
         //Container, jonka sisaan avautuu kodit ja kayttajat
 		content = new VerticalLayout();
 		content.setSizeFull();
-
 		addComponent(content);
 				
 	}
@@ -72,10 +77,12 @@ public class AdminTopView extends VerticalLayout implements View {
 		        subContent.addComponent(houseid);
 		        Button add = new Button("Add");
 		        add.addClickListener(new ClickListener() {
-					@Override
+					
+		        	@Override
 					public void buttonClick(ClickEvent event) {
 						Home home = new Home(housename.getValue(), Integer.parseInt(houseid.getValue()));
 						homes.addItem(home.getName(), null, new MenuBar.Command() {
+							//lisataan menun kotinappulaan komento avata kotinakyma
 							@Override
 							public void menuSelected(MenuItem selectedItem) {
 								if (content.getComponentCount() > 0) content.removeAllComponents();
@@ -83,7 +90,6 @@ public class AdminTopView extends VerticalLayout implements View {
 							} });
 						subWindow.close();
 					}
-		        	
 		        });
 		        subContent.addComponent(add);
 		        // Center it in the browser window
@@ -103,13 +109,17 @@ public class AdminTopView extends VerticalLayout implements View {
 		        subContent.setMargin(true);
 		        subWindow.setContent(subContent);
 		        TextField username = new TextField("Username");
+		        TextField password = new TextField("Password");
 		        subContent.addComponent(username);
+		        subContent.addComponent(password);
 		        Button add = new Button("Add");
 		        add.addClickListener(new ClickListener() {
-					@Override
+					
+		        	@Override
 					public void buttonClick(ClickEvent event) {
-						User user = new User(username.getValue());
+						User user = new User(username.getValue(), password.getValue());
 						users.addItem(user.getName(), null, new MenuBar.Command() {
+							//lisataan menun kayttajanappulaan komento avata kayttajanakyma
 							@Override
 							public void menuSelected(MenuItem selectedItem) {
 								if (content.getComponentCount() > 0) content.removeAllComponents();
@@ -128,27 +138,78 @@ public class AdminTopView extends VerticalLayout implements View {
 	}
 	
 	//Avataan kodin tiedot. Pitaisi hakea muistista kodin nimea (mieluummin id:ta) vastaava koti-olio
-	public void viewHome(String name) {
+	private void viewHome(String name) {
 		Accordion acc = new Accordion();
 		acc.setCaption(name);
 		acc.setIcon(FontAwesome.HOME);
-		acc.setWidth("50%");
-		acc.addTab(new Label("hello")).setCaption("hello");
-		acc.addTab(new Label("how")).setCaption("hello");
+		acc.setWidth("40%");
+		acc.setHeight("100%");
+		
+		Layout testTab = new VerticalLayout();
+		testTab.setCaption("room0");
+		testTab.addComponent(new Label("valot"));
+		testTab.addComponent(new Label("pakastin"));
+		testTab.addComponent(new Button("add item to room"));
+		acc.addTab(testTab);
+		
+		acc.addTab(new Label("hello!")).setCaption("room1");
+		acc.addTab(new Label("hi!")).setCaption("room2");
 		content.addComponent(acc);
 		content.setComponentAlignment(acc, Alignment.MIDDLE_CENTER);
 	}
 
-	//Avataan kayttajan tiedot. Pitaisi hakea muistista kayttajan nimea vastaava olio
-	public void viewUser(String name) {
-		Accordion acc = new Accordion();
-		acc.setCaption(name);
-		acc.setIcon(FontAwesome.USER);
-		acc.setWidth("50%");
-		acc.addTab(new Label("hello")).setCaption("hello");
-		acc.addTab(new Label("how")).setCaption("hello");
-		content.addComponent(acc);
-		content.setComponentAlignment(acc, Alignment.MIDDLE_CENTER);
+	//Avataan kayttajan tiedot. Pitaisi hakea muistista kayttajan nimea vastaava olio.
+	private void viewUser(String name) {
+		Panel userPanel = new Panel(name);
+		userPanel.setSizeUndefined();
+		userPanel.setIcon(FontAwesome.USER);
+		content.addComponent(userPanel);
+		
+		Button addView = new Button("Add view");
+       	addView.setIcon(FontAwesome.PLUS);
+		addView.addClickListener(new ClickListener() {	
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				Window subWindow = new Window("Add view");
+		        VerticalLayout subContent = new VerticalLayout();
+		        subContent.setMargin(true);
+		        subWindow.setContent(subContent);
+		        
+		        //liita kayttaja kotiin ja lisaa kotiin tavaroita
+		        ListSelect homesList = new ListSelect("Homes");
+		        homesList.addItems("Here be homes", "Moar Homes");
+		        homesList.setNullSelectionAllowed(false);
+		        homesList.setRows(3);
+		        
+		        CheckBox checkbox1 = new CheckBox("Add item to view");
+		        
+		        Button add = new Button("Add");
+		        add.addClickListener(new ClickListener() {
+					
+		        	@Override
+					public void buttonClick(ClickEvent event) {
+						//lisaa kayttajalle nakyma
+						subWindow.close();		
+					}
+		        });
+		        subContent.addComponent(add);
+		        subContent.addComponent(homesList);
+		        subContent.addComponent(checkbox1);
+		        
+		        subWindow.center();
+		        UI.getCurrent().addWindow(subWindow);
+			}
+		});
+		
+		VerticalLayout panelContent = new VerticalLayout();
+		panelContent.addComponent(addView);
+		Label label = new Label("User's current view");
+		panelContent.addComponent(label);
+		panelContent.setSizeUndefined();
+		panelContent.setMargin(true);
+		userPanel.setContent(panelContent);
+		content.setComponentAlignment(userPanel, Alignment.MIDDLE_CENTER);
 	}
 	
 	//Tein tallaiset tahan nyt testitarkoituksiin
@@ -167,9 +228,11 @@ public class AdminTopView extends VerticalLayout implements View {
 		
 	public class User {
 		private String name;
+		private String password;
 			
-		public User(String name) {
+		public User(String name, String password) {
 			this.name = name;
+			this.password = password;
 		}
 		
 		public String getName(){ return name; }

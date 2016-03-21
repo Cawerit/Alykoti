@@ -6,6 +6,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -33,14 +34,19 @@ public class LoginView extends VerticalLayout implements View {
         	
         });
         
-        addComponent(username);
-        addComponent(password);
-        addComponent(loginButton);
-     
+        Panel loginPanel = new Panel("Smarthome 3000");
+        loginPanel.setSizeUndefined();
+        addComponent(loginPanel);
         
-        setComponentAlignment(username, Alignment.MIDDLE_CENTER);
-        setComponentAlignment(password, Alignment.TOP_CENTER);
-        setComponentAlignment(loginButton, Alignment.TOP_CENTER);
+        VerticalLayout panelContent = new VerticalLayout();
+        panelContent.setSizeUndefined();
+        panelContent.addComponent(username);
+        panelContent.addComponent(password);
+        panelContent.addComponent(loginButton);
+        panelContent.setMargin(true);
+        loginPanel.setContent(panelContent);
+        setComponentAlignment(loginPanel, Alignment.MIDDLE_CENTER);
+      
     }
 
 	@Override
