@@ -22,30 +22,34 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("alykoti")
 public class AlykotiUI extends UI {
 
-	static Navigator navigator;
+	static Navigator NAVIGATOR;
 	//tyyppiturvallisuuden takia:
 	protected static final String ADMINTOP = "adminTop";
-	protected static final String HOMES = "homes";
-	protected static final String USERS = "users";
+	protected static final String USERVIEW = "user";
 	
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class)
 	public static class Servlet extends VaadinServlet {
+	
+		
 	}
 
 	@Override
 	protected void init(VaadinRequest request) {
 		
-		navigator = new Navigator(this, this);
-		navigator.addView("", new LoginView());
-		navigator.addView(ADMINTOP, new AdminTopView());
-		navigator.addView(HOMES, new HomesView());
-		navigator.addView(USERS, new UsersView());
+		NAVIGATOR = new Navigator(this, this);
+		NAVIGATOR.addView("", new LoginView());
+		NAVIGATOR.addView(ADMINTOP, new AdminTopView());
+		NAVIGATOR.addView(USERVIEW, new UserView());
+		NAVIGATOR.setErrorView(new ErrorView());
 		
 		
 		setContent(new LoginView());
 
+		
 		}
+	
+	
 	
   
     
