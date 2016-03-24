@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="exploded-war" name="alykoti exploded">
+  <artifact type="exploded-war" build-on-make="true" name="alykoti exploded">
     <output-path>$PROJECT_DIR$/out/artifacts/alykoti_exploded</output-path>
     <root id="root">
       <element id="directory" name="WEB-INF">
@@ -7,7 +7,70 @@
           <element id="module-output" name="Alykoti" />
         </element>
         <element id="directory" name="lib">
-          <element id="library" level="project" name="lib" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/sac-1.3.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/js-1.7R2.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/ant-1.6.5.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/asm-5.0.3.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/junit-4.11.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jsoup-1.8.3.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/easymock-3.0.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/httpcore-4.3.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/icu4j-50.1.1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/objenesis-1.2.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/asm-tree-5.0.3.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/asm-util-5.0.3.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/commons-io-2.4.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/httpmime-4.3.1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/cglib-nodep-2.2.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/flute-1.3.0.gg2.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/nekohtml-1.9.19.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/xml-apis-1.4.01.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/cssparser-0.9.11.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/httpclient-4.3.1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/serializer-2.7.1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/swing-worker-1.1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/apache-mime4j-0.6.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/asm-commons-5.0.3.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/commons-codec-1.8.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/commons-lang3-3.1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/hamcrest-core-1.3.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/xercesImpl-2.11.0.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/ant-launcher-1.6.5.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/yuicompressor-2.4.8.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/guava-16.0.1.vaadin1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/commons-logging-1.1.3.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/javax.servlet-api-3.0.1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/validation-api-1.0.0.GA.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/vaadin-slf4j-jdk14-1.6.1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/commons-collections-3.2.2.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-io-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-xml-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/appengine-api-1.0-sdk-1.7.7.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-http-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-jndi-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-plus-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-util-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/vaadin-sass-compiler-0.9.13.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-client-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-server-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-webapp-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-servlet-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-security-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-servlets-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/validation-api-1.0.0.GA-sources.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/atmosphere-runtime-2.2.7.vaadin1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/vaadin-client-compiler-deps-1.2.0.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-annotations-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/jetty-continuation-8.1.12.v20130726.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/lib/streamhtmlparser-jsilver-0.0.10.vaadin1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-push-7.6.4.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-client-7.6.4.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-server-7.6.4.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-shared-7.6.4.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-themes-7.6.4.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-widgets-7.6.4.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-client-compiled-7.6.4.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-client-compiler-7.6.4.jar" />
         </element>
       </element>
     </root>
