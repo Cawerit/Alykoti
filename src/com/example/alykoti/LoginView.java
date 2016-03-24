@@ -1,5 +1,6 @@
 package com.example.alykoti;
 
+import com.example.alykoti.services.Database;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -18,7 +19,9 @@ public class LoginView extends VerticalLayout implements View {
     	setHeight("100%");
         TextField username = new TextField("Username");
         username.setIcon(FontAwesome.USER);
-        
+
+        Database.getConnection();//Test the connection
+
         PasswordField password = new PasswordField("Password");
         password.setIcon(FontAwesome.KEY);
         
