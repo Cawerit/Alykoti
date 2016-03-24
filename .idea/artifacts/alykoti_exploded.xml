@@ -71,6 +71,8 @@
           <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-widgets-7.6.4.jar" />
           <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-client-compiled-7.6.4.jar" />
           <element id="file-copy" path="$PROJECT_DIR$/lib/vaadin/vaadin-client-compiler-7.6.4.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/mysql/mysql-connector-java-5.1.38/mysql-connector-java-5.1.38-bin.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib/AlykotiDBConnector.jar" />
         </element>
       </element>
     </root>
