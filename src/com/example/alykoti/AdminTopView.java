@@ -60,6 +60,7 @@ public class AdminTopView extends VerticalLayout implements View {
 		content = new VerticalLayout();
 		content.setSizeFull();
 		addComponent(content);
+		setComponentAlignment(content, Alignment.MIDDLE_CENTER);
 				
 	}
 	
@@ -72,15 +73,13 @@ public class AdminTopView extends VerticalLayout implements View {
 		        subContent.setMargin(true);
 		        subWindow.setContent(subContent);
 		        TextField housename = new TextField("House name");
-		        TextField houseid = new TextField("House ID"); // ehka house id:n pitaisi tulla automaattisesti eika nain
 		        subContent.addComponent(housename);
-		        subContent.addComponent(houseid);
 		        Button add = new Button("Add");
 		        add.addClickListener(new ClickListener() {
 					
 		        	@Override
 					public void buttonClick(ClickEvent event) {
-						Home home = new Home(housename.getValue(), Integer.parseInt(houseid.getValue()));
+						Home home = new Home(housename.getValue());
 						homes.addItem(home.getName(), null, new MenuBar.Command() {
 							//lisataan menun kotinappulaan komento avata kotinakyma
 							@Override
@@ -137,7 +136,7 @@ public class AdminTopView extends VerticalLayout implements View {
 		};
 	}
 	
-	//Avataan kodin tiedot. Pitaisi hakea muistista kodin nimea (mieluummin id:ta) vastaava koti-olio
+	//Avataan kodin tiedot. Pitaisi hakea muistista kodin nimea (id:ta) vastaava koti-olio
 	private void viewHome(String name) {
 		Accordion acc = new Accordion();
 		acc.setCaption(name);
@@ -149,8 +148,18 @@ public class AdminTopView extends VerticalLayout implements View {
 		testTab.setCaption("room0");
 		testTab.addComponent(new Label("valot"));
 		testTab.addComponent(new Label("pakastin"));
-		testTab.addComponent(new Button("add item to room"));
+		Button roomview = new Button("See Room");
+		roomview.addClickListener(new ClickListener(){
+			@Override
+			public void buttonClick(ClickEvent event) {
+				//jokaisesta huoneesta (tai kodista) paastava RoomViewiin, johon annetaan uri-fragmentilla parametri 
+				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW);
+			}
+		});
+
+		testTab.addComponent(roomview);
 		acc.addTab(testTab);
+		
 		
 		acc.addTab(new Label("hello!")).setCaption("room1");
 		acc.addTab(new Label("hi!")).setCaption("room2");
@@ -186,7 +195,6 @@ public class AdminTopView extends VerticalLayout implements View {
 		        
 		        Button add = new Button("Add");
 		        add.addClickListener(new ClickListener() {
-					
 		        	@Override
 					public void buttonClick(ClickEvent event) {
 						//lisaa kayttajalle nakyma
@@ -217,9 +225,9 @@ public class AdminTopView extends VerticalLayout implements View {
 		private String name;
 		private int id;
 			
-		public Home(String name, int id) {
+		public Home(String name) {
 			this.name = name;
-			this.id = id;
+			
 		}
 		
 		public String getName(){ return name; }

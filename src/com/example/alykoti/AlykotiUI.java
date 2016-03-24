@@ -1,8 +1,6 @@
 package com.example.alykoti;
 
-
 import javax.servlet.annotation.WebServlet;
-
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.navigator.Navigator;
@@ -22,37 +20,36 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("alykoti")
 public class AlykotiUI extends UI {
 
+	
 	static Navigator NAVIGATOR;
-	//tyyppiturvallisuuden takia:
+	//tyyppiturvallisuuden takia tjsp:
 	protected static final String ADMINTOP = "adminTop";
 	protected static final String USERVIEW = "user";
-	
+	protected static final String ROOMVIEW = "room";
+
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class)
 	public static class Servlet extends VaadinServlet {
 	
 		
+		 
 	}
 
 	@Override
 	protected void init(VaadinRequest request) {
 		
+		
+		
 		NAVIGATOR = new Navigator(this, this);
 		NAVIGATOR.addView("", new LoginView());
 		NAVIGATOR.addView(ADMINTOP, new AdminTopView());
 		NAVIGATOR.addView(USERVIEW, new UserView());
+		NAVIGATOR.addView(ROOMVIEW, new RoomView());
 		NAVIGATOR.setErrorView(new ErrorView());
 		
-		
+				
 		setContent(new LoginView());
-
-		
-		}
-	
-	
-	
-  
-    
+		}    
 }
 
 

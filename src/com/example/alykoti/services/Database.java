@@ -17,6 +17,7 @@ public class Database {
         try {
             Class.forName("com.mysql.jdbc.Driver");//NOTE: Mysql driver needs to be in build path
             conn = DriverManager.getConnection(getUrl(), getUsername(), getPassword());
+            System.out.println("Connection established");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
