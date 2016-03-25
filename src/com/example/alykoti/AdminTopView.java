@@ -1,5 +1,7 @@
 package com.example.alykoti;
 
+import com.example.alykoti.models.User;
+import com.example.alykoti.services.AuthService;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -21,6 +23,8 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+
+import java.sql.SQLException;
 
 public class AdminTopView extends VerticalLayout implements View {
 	HorizontalLayout bar;
@@ -46,7 +50,7 @@ public class AdminTopView extends VerticalLayout implements View {
        	users.setDescription("Manage users");
        	users.setIcon(FontAwesome.USER);
        	users.addItem("Add user", FontAwesome.PLUS, addUser());
-       	//Pitäisi lukea tallennentut käyttäjät ja kodit ja lisätä ne menuun
+       	//Pitï¿½isi lukea tallennentut kï¿½yttï¿½jï¿½t ja kodit ja lisï¿½tï¿½ ne menuun
        	
 		bar.addComponent(menubar);
 		
@@ -116,15 +120,29 @@ public class AdminTopView extends VerticalLayout implements View {
 					
 		        	@Override
 					public void buttonClick(ClickEvent event) {
-						User user = new User(username.getValue(), password.getValue());
-						users.addItem(user.getName(), null, new MenuBar.Command() {
-							//lisataan menun kayttajanappulaan komento avata kayttajanakyma
-							@Override
-							public void menuSelected(MenuItem selectedItem) {
-								if (content.getComponentCount() > 0) content.removeAllComponents();
-								viewUser(selectedItem.getText());
-							} });
-						subWindow.close();		
+
+						User user = null;
+						try {
+							String usr = username.getValue();
+							String pwd = password.getValue();
+							//TODO Ask the user's role
+							AuthService.Role role = AuthService.Role.ADMIN;
+							//Signup
+							user = AuthService.getInstance().signup(usr, pwd, role);
+						} catch (SQLException e) {
+							e.printStackTrace();
+						}
+
+						if(user != null){
+							users.addItem(user.getUsername(), null, new MenuBar.Command() {
+								//lisataan menun kayttajanappulaan komento avata kayttajanakyma
+								@Override
+								public void menuSelected(MenuItem selectedItem) {
+									if (content.getComponentCount() > 0) content.removeAllComponents();
+									viewUser(selectedItem.getText());
+								} });
+							subWindow.close();
+						}
 					}
 		        });
 		        subContent.addComponent(add);
@@ -233,19 +251,6 @@ public class AdminTopView extends VerticalLayout implements View {
 		public String getName(){ return name; }
 		public int getId() { return id; }
 	}
-		
-	public class User {
-		private String name;
-		private String password;
-			
-		public User(String name, String password) {
-			this.name = name;
-			this.password = password;
-		}
-		
-		public String getName(){ return name; }
-	}
-	
 	
  
 	@Override
