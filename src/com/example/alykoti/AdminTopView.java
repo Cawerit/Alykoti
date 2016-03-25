@@ -11,7 +11,6 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
@@ -26,6 +25,8 @@ import com.vaadin.ui.Window;
 
 import java.sql.SQLException;
 
+import com.example.alykoti.models.Home;
+
 public class AdminTopView extends VerticalLayout implements View {
 	HorizontalLayout bar;
 	MenuBar menubar;
@@ -35,7 +36,6 @@ public class AdminTopView extends VerticalLayout implements View {
 	Button logout;
 	
 	public AdminTopView() {
-		//palkki, jonka sisalla on menu ja logout-nappula
 		bar = new HorizontalLayout();
 		bar.setWidth("100%");
 		addComponent(bar);
@@ -45,12 +45,13 @@ public class AdminTopView extends VerticalLayout implements View {
        	homes.setDescription("Manage homes");
        	homes.setIcon(FontAwesome.HOME);
        	homes.addItem("Add home", FontAwesome.PLUS, addHome());
+       	//TODO: Hae tietokannasta kodit ja lisaa ne menuun
        	
 		users = menubar.addItem("Users", null, null);
        	users.setDescription("Manage users");
        	users.setIcon(FontAwesome.USER);
        	users.addItem("Add user", FontAwesome.PLUS, addUser());
-       	//Pit�isi lukea tallennentut k�ytt�j�t ja kodit ja lis�t� ne menuun
+       	//TODO: Hae tietokannasta kayttajat ja lisaa ne menuun
        	
 		bar.addComponent(menubar);
 		
@@ -83,7 +84,7 @@ public class AdminTopView extends VerticalLayout implements View {
 					
 		        	@Override
 					public void buttonClick(ClickEvent event) {
-						Home home = new Home(housename.getValue());
+		        		Home home = new Home(housename.getValue());
 						homes.addItem(home.getName(), null, new MenuBar.Command() {
 							//lisataan menun kotinappulaan komento avata kotinakyma
 							@Override
@@ -111,10 +112,13 @@ public class AdminTopView extends VerticalLayout implements View {
 		        VerticalLayout subContent = new VerticalLayout();
 		        subContent.setMargin(true);
 		        subWindow.setContent(subContent);
+		        
 		        TextField username = new TextField("Username");
 		        TextField password = new TextField("Password");
+		        CheckBox setAsAdmin = new CheckBox("Set as administrator");
 		        subContent.addComponent(username);
 		        subContent.addComponent(password);
+		        subContent.addComponent(setAsAdmin);
 		        Button add = new Button("Add");
 		        add.addClickListener(new ClickListener() {
 					
@@ -125,8 +129,9 @@ public class AdminTopView extends VerticalLayout implements View {
 						try {
 							String usr = username.getValue();
 							String pwd = password.getValue();
-							//TODO Ask the user's role
-							AuthService.Role role = AuthService.Role.ADMIN;
+							AuthService.Role role; 
+							if(setAsAdmin.getValue()) role = AuthService.Role.ADMIN;
+							else role = AuthService.Role.USER;
 							//Signup
 							user = AuthService.getInstance().signup(usr, pwd, role);
 						} catch (SQLException e) {
@@ -154,7 +159,9 @@ public class AdminTopView extends VerticalLayout implements View {
 		};
 	}
 	
-	//Avataan kodin tiedot. Pitaisi hakea muistista kodin nimea (id:ta) vastaava koti-olio
+	//Avataan kodin tiedot. 
+	//TODO: Pitaisi hakea tietokannasta kodin nimea (id:ta) vastaava koti ja sen esineet
+	//TODO: Tama kotinakyma olisi ehka parempi laittaa omaksi luokakseen
 	private void viewHome(String name) {
 		Accordion acc = new Accordion();
 		acc.setCaption(name);
@@ -166,26 +173,32 @@ public class AdminTopView extends VerticalLayout implements View {
 		testTab.setCaption("room0");
 		testTab.addComponent(new Label("valot"));
 		testTab.addComponent(new Label("pakastin"));
-		Button roomview = new Button("See Room");
-		roomview.addClickListener(new ClickListener(){
-			@Override
-			public void buttonClick(ClickEvent event) {
-				//jokaisesta huoneesta (tai kodista) paastava RoomViewiin, johon annetaan uri-fragmentilla parametri 
-				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW);
-			}
-		});
-
-		testTab.addComponent(roomview);
 		acc.addTab(testTab);
-		
 		
 		acc.addTab(new Label("hello!")).setCaption("room1");
 		acc.addTab(new Label("hi!")).setCaption("room2");
+
+		Button roomButton = new Button("Open Room View");
+		roomButton.setIcon(FontAwesome.EYE);
+		roomButton.addClickListener(new ClickListener(){
+			@Override
+			public void buttonClick(ClickEvent event) {
+				//jokaisesta kodista paastava RoomViewiin
+				//TODO: uri-fragmentilla(?) oikeaan taloon
+				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW); 
+			}
+		});
+		
+		
 		content.addComponent(acc);
+		content.addComponent(roomButton);
 		content.setComponentAlignment(acc, Alignment.MIDDLE_CENTER);
+		content.setComponentAlignment(roomButton, Alignment.TOP_CENTER);
+
 	}
 
 	//Avataan kayttajan tiedot. Pitaisi hakea muistista kayttajan nimea vastaava olio.
+	//TODO: Tastakin oma luokkansa?
 	private void viewUser(String name) {
 		Panel userPanel = new Panel(name);
 		userPanel.setSizeUndefined();
@@ -238,19 +251,6 @@ public class AdminTopView extends VerticalLayout implements View {
 		content.setComponentAlignment(userPanel, Alignment.MIDDLE_CENTER);
 	}
 	
-	//Tein tallaiset tahan nyt testitarkoituksiin
-	public class Home {
-		private String name;
-		private int id;
-			
-		public Home(String name) {
-			this.name = name;
-			
-		}
-		
-		public String getName(){ return name; }
-		public int getId() { return id; }
-	}
 	
  
 	@Override
