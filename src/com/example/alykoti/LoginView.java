@@ -1,6 +1,7 @@
 package com.example.alykoti;
 
-import com.example.alykoti.services.Database;
+import com.example.alykoti.services.AuthService;
+import com.example.alykoti.services.DatabaseService;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -12,6 +13,8 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
+import java.sql.SQLException;
+
 public class LoginView extends VerticalLayout implements View {
     
     public LoginView() {
@@ -19,8 +22,6 @@ public class LoginView extends VerticalLayout implements View {
     	setHeight("100%");
         TextField username = new TextField("Username");
         username.setIcon(FontAwesome.USER);
-
-        Database.getConnection();//Test the connection
 
         PasswordField password = new PasswordField("Password");
         password.setIcon(FontAwesome.KEY);
