@@ -25,7 +25,6 @@ public class LoginView extends VerticalLayout implements View {
         Button loginButton = new Button("login");
         loginButton.setIcon(FontAwesome.CHECK);    
         loginButton.addClickListener(new Button.ClickListener() {
-			//Login pitaa hoitaa kunnolla eika nain
         	@Override
 			public void buttonClick(ClickEvent event) {
                 User user = null;
@@ -38,10 +37,10 @@ public class LoginView extends VerticalLayout implements View {
                     if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMINTOP);
                     else AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERVIEW);
                 } else {
-                    Notification.show("Käyttäjätunnus tai salasana väärin", Notification.Type.WARNING_MESSAGE);
+                    Notification.show("Kayttajatunnus tai salasana vaarin", Notification.Type.WARNING_MESSAGE);
                 }
 			}
-        	
+        		
         });
         
         Panel loginPanel = new Panel("Smarthome 3000");
