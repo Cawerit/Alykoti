@@ -2,6 +2,7 @@ package com.example.alykoti.services;
 
 import com.example.alykoti.models.User;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,33 +10,47 @@ import java.util.UUID;
 
 public class AuthService {
 
-    public void signup(String username, String password, Role role) throws SQLException {
+    public User signup(String username, String password, Role role) throws SQLException {
         String salt = genSalt();
-        PreparedStatement statement = databaseService
-                .getConnection()
-                .prepareStatement(SIGNUP_STATEMENT);
-        statement.setString(1, username);
-        statement.setString(2, password+salt);
-        statement.setString(3, role.toString());
-        statement.setString(4, salt);
-        statement.execute();
+        Connection conn = databaseService
+                .getConnection();
+        try {
+            PreparedStatement statement = conn
+                    .prepareStatement(SIGNUP_STATEMENT);
+            statement.setString(1, username);
+            statement.setString(2, password + salt);
+            statement.setString(3, role.toString());
+            statement.setString(4, salt);
+            statement.execute();
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException ignored){}
+        }
+        return new User(username, role);
     }
 
     public User login(String username, String password) throws SQLException {
-        PreparedStatement statement = databaseService
-                .getConnection()
-                .prepareStatement(LOGIN_STATEMENT);
-        statement.setString(1, username);
-        statement.setString(2, password);
+        Connection conn = databaseService
+                .getConnection();
+        try {
+            PreparedStatement statement = conn
+                    .prepareStatement(LOGIN_STATEMENT);
+            statement.setString(1, username);
+            statement.setString(2, password);
 
-        ResultSet result = statement.executeQuery();
-        if(result.first()){
-            return new User(result.getString("username"), Role.fromString(result.getString("role")));
-        } else {
-            System.out.println("No user was found");
-            return null;//No users with that name & password
+            ResultSet result = statement.executeQuery();
+            if (result.first()) {
+                return new User(result.getString("username"), Role.fromString(result.getString("role")));
+            } else {
+                System.out.println("No user was found");
+                return null;//No users with that name & password
+            }
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException ignored){}
         }
-
     }
 
     private static final String SIGNUP_STATEMENT =
