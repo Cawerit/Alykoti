@@ -1,16 +1,15 @@
 package com.example.alykoti;
 
-import com.example.alykoti.services.Database;
+import com.example.alykoti.models.User;
+import com.example.alykoti.services.AuthService;
+import com.example.alykoti.services.DatabaseService;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+
+import java.sql.SQLException;
 
 public class LoginView extends VerticalLayout implements View {
     
@@ -19,8 +18,6 @@ public class LoginView extends VerticalLayout implements View {
     	setHeight("100%");
         TextField username = new TextField("Username");
         username.setIcon(FontAwesome.USER);
-
-        Database.getConnection();//Test the connection
 
         PasswordField password = new PasswordField("Password");
         password.setIcon(FontAwesome.KEY);
@@ -31,8 +28,18 @@ public class LoginView extends VerticalLayout implements View {
 			//Login pitaa hoitaa kunnolla eika nain
         	@Override
 			public void buttonClick(ClickEvent event) {
-				if (username.getValue().equals("admin")) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMINTOP);
-				else AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERVIEW);
+                User user = null;
+                try {
+                    user = AuthService.getInstance().login(username.getValue(), password.getValue());
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                if(user != null){
+                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMINTOP);
+                    else AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERVIEW);
+                } else {
+                    Notification.show("Käyttäjätunnus tai salasana väärin", Notification.Type.WARNING_MESSAGE);
+                }
 			}
         	
         });
