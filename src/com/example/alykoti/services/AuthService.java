@@ -1,6 +1,9 @@
 package com.example.alykoti.services;
 
+import com.example.alykoti.models.User;
+
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
@@ -18,8 +21,30 @@ public class AuthService {
         statement.execute();
     }
 
+    public User login(String username, String password) throws SQLException {
+        PreparedStatement statement = databaseService
+                .getConnection()
+                .prepareStatement(LOGIN_STATEMENT);
+        statement.setString(1, username);
+        statement.setString(2, password);
+
+        ResultSet result = statement.executeQuery();
+        if(result.first()){
+            return new User(result.getString("username"), Role.fromString(result.getString("role")));
+        } else {
+            System.out.println("No user was found");
+            return null;//No users with that name & password
+        }
+
+    }
+
     private static final String SIGNUP_STATEMENT =
             "INSERT INTO users (username, password, role, salt) SELECT ?, SHA2(?, 224), ?, ?";
+
+    private static final String LOGIN_STATEMENT =
+            "SELECT username, role " +
+                    "FROM users " +
+                    "WHERE username = ? AND password = SHA2(CONCAT(?, salt), 224);";
 
     //DI stuff
     private static AuthService instance;
@@ -47,12 +72,19 @@ public class AuthService {
         ADMIN("ADMIN");
 
         private final String sqlValue;
-        private Role(String sqlValue){
+        Role(String sqlValue){
             this.sqlValue = sqlValue;
         }
         @Override
         public String toString(){
             return this.sqlValue;
+        }
+
+        public static Role fromString(String str){
+            for(Role r : Role.values()){
+                if(r.toString().equals(str)) return r;
+            }
+            return null;
         }
     }
 
