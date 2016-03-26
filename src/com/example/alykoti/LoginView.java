@@ -3,6 +3,7 @@ package com.example.alykoti;
 import com.example.alykoti.models.User;
 import com.example.alykoti.services.AuthService;
 import com.example.alykoti.services.DatabaseService;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -18,6 +19,7 @@ public class LoginView extends VerticalLayout implements View {
     	setHeight("100%");
         TextField username = new TextField("Username");
         username.setIcon(FontAwesome.USER);
+        username.focus();
 
         PasswordField password = new PasswordField("Password");
         password.setIcon(FontAwesome.KEY);
@@ -42,6 +44,7 @@ public class LoginView extends VerticalLayout implements View {
 			}
         		
         });
+        loginButton.setClickShortcut(KeyCode.ENTER);
         
         Panel loginPanel = new Panel("Smarthome 3000");
         loginPanel.setSizeUndefined();
