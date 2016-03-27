@@ -20,6 +20,7 @@ public class AlykotiUI extends UI {
 	protected static final String ADMINTOP = "adminTop";
 	protected static final String USERVIEW = "user";
 	protected static final String ROOMVIEW = "room";
+	static final String USERGROUPSVIEW = "user-groups";
 	
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class)
@@ -36,6 +37,7 @@ public class AlykotiUI extends UI {
 		NAVIGATOR.addView(ADMINTOP, new AdminTopView());
 		NAVIGATOR.addView(USERVIEW, new UserView());
 		NAVIGATOR.addView(ROOMVIEW, new RoomView());
+		NAVIGATOR.addView(USERGROUPSVIEW, new AppView());
 		NAVIGATOR.setErrorView(new ErrorView());
 		
 		

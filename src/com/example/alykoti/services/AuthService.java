@@ -1,6 +1,8 @@
 package com.example.alykoti.services;
 
+import com.example.alykoti.AlykotiUI;
 import com.example.alykoti.models.User;
+import com.vaadin.ui.UI;
 
 import java.sql.*;
 import java.util.UUID;
@@ -44,7 +46,9 @@ public class AuthService {
 
             ResultSet result = statement.executeQuery();
             if (result.first()) {
-                return new User(result.getString("username"), Role.fromString(result.getString("role")));
+                User user = User.fromResultSet(result);
+                setCurrentUser(user);
+                return user;
             } else {
                 System.out.println("No user was found");
                 return null;//No users with that name & password
@@ -60,7 +64,7 @@ public class AuthService {
             "INSERT INTO users (username, password, role, salt) SELECT ?, SHA2(?, 224), ?, ?";
 
     private static final String LOGIN_STATEMENT =
-            "SELECT username, role " +
+            "SELECT username, role, id " +
                     "FROM users " +
                     "WHERE username = ? AND password = SHA2(CONCAT(?, salt), 224);";
 
@@ -79,6 +83,21 @@ public class AuthService {
     public static AuthService getInstance() {
         if(instance == null) instance = new AuthService(DatabaseService.getInstance());
         return instance;
+    }
+
+    private static final String CURRENT_USER_SESSION_VAR = "CURRENT_USER";
+
+    public User getCurrentUser(){
+        UI ui = AlykotiUI.getCurrent();
+        Object value = ui.getSession().getAttribute(CURRENT_USER_SESSION_VAR);
+        System.out.println("Get current user " + value);
+        return value == null ? null : (User) value;
+    }
+
+    private void setCurrentUser(User user){
+        System.out.println("Set current user");
+        UI ui = AlykotiUI.getCurrent();
+        ui.getSession().setAttribute(CURRENT_USER_SESSION_VAR, user);
     }
 
     /**

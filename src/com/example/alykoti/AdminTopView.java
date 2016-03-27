@@ -47,7 +47,7 @@ public class AdminTopView extends VerticalLayout implements View {
 		}
 
 		bar.addComponent(menubar);
-		
+
 		logout = new Button("Logout");
 		logout.setIcon(FontAwesome.BACKWARD);
         logout.addClickListener(click -> AlykotiUI.NAVIGATOR.navigateTo(""));
@@ -74,7 +74,7 @@ public class AdminTopView extends VerticalLayout implements View {
 		        subContent.addComponent(housename);
 		        Button add = new Button("Add");
 		        add.addClickListener(new ClickListener() {
-					
+
 		        	@Override
 					public void buttonClick(ClickEvent event) {
 		        		Home home = new Home(housename.getValue());
@@ -91,7 +91,7 @@ public class AdminTopView extends VerticalLayout implements View {
 		        subContent.addComponent(add);
 		        // Center it in the browser window
 		        subWindow.center();
-		        // Open it in the UI 
+		        // Open it in the UI
 		        UI.getCurrent().addWindow(subWindow);
 			}
 		};
@@ -108,54 +108,7 @@ public class AdminTopView extends VerticalLayout implements View {
 	public MenuBar.Command addUser() {
 		return new MenuBar.Command() {			
 			public void menuSelected(MenuItem selectedItem) {
-				Window subWindow = new Window("Add user");
-		        VerticalLayout subContent = new VerticalLayout();
-		        subContent.setMargin(true);
-		        subWindow.setContent(subContent);
-		        
-		        TextField username = new TextField("Username");
-		        TextField password = new TextField("Password");
-		        CheckBox setAsAdmin = new CheckBox("Set as administrator");
-		        subContent.addComponent(username);
-		        subContent.addComponent(password);
-		        subContent.addComponent(setAsAdmin);
-		        Button add = new Button("Add");
-		        add.addClickListener(new ClickListener() {
-					
-		        	@Override
-					public void buttonClick(ClickEvent event) {
 
-						User user = null;
-						try {
-
-							String usr = username.getValue();
-							String pwd = password.getValue();
-
-							if(User.usernameExists(usr)){
-								Notification.show("Käyttäjänimi on jo varattu");
-								return;
-							}
-
-							AuthService.Role role = setAsAdmin.getValue() ?
-									AuthService.Role.ADMIN : AuthService.Role.USER;
-							//Signup
-							user = AuthService.getInstance().signup(usr, pwd, role);
-
-						} catch (SQLException e) {
-							e.printStackTrace();
-						}
-
-						if(user != null){
-							addUserToList(user);
-							subWindow.close();
-						}
-					}
-		        });
-		        subContent.addComponent(add);
-		        // Center it in the browser window
-		        subWindow.center();
-		        // Open it in the UI 
-		        UI.getCurrent().addWindow(subWindow);
 			}
 		};
 	}

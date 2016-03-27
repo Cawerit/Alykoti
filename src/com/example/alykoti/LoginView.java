@@ -36,7 +36,8 @@ public class LoginView extends VerticalLayout implements View {
                     e.printStackTrace();
                 }
                 if(user != null){
-                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMINTOP);
+//                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMINTOP);
+                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERGROUPSVIEW);
                     else AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERVIEW);
                 } else {
                     Notification.show("Kayttajatunnus tai salasana vaarin", Notification.Type.WARNING_MESSAGE);

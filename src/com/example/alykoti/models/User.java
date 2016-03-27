@@ -83,4 +83,9 @@ public class User {
 
     private static final String COUNT_USERS_STATEMENT =
             "SELECT COUNT(*) FROM users WHERE username = ?";
+
+    public String toString(){
+        return "User { id " + getId() + ", username: " + getUsername() + ", role: " + getRole().toString() + " }";
+    }
+
 }
