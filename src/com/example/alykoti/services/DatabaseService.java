@@ -32,4 +32,34 @@ public class DatabaseService {
         return conn;
     }
 
+    /**
+     * Gets a connection to the db and safely runs the given function with it.
+     * Useful when making simple requests to the db.
+     * @param f
+     * @param <R>
+     * @return
+     */
+    public <R> R useConnection(CheckedSqlFunction<R> f) throws SQLException {
+        Connection conn = null;
+        R result = null;
+        try {
+            conn = this.getConnection();
+            result = f.apply(conn);
+        } finally {
+            if(conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    @FunctionalInterface
+    public interface CheckedSqlFunction<R> {
+        R apply(Connection c) throws SQLException;
+    }
+
 }

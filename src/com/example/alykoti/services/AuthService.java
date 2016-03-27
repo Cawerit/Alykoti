@@ -2,32 +2,35 @@ package com.example.alykoti.services;
 
 import com.example.alykoti.models.User;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.UUID;
 
 public class AuthService {
 
     public User signup(String username, String password, Role role) throws SQLException {
         String salt = genSalt();
+        Integer id = null;
         Connection conn = databaseService
                 .getConnection();
         try {
             PreparedStatement statement = conn
-                    .prepareStatement(SIGNUP_STATEMENT);
+                    .prepareStatement(SIGNUP_STATEMENT, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, username);
             statement.setString(2, password + salt);
             statement.setString(3, role.toString());
             statement.setString(4, salt);
             statement.execute();
+
+            ResultSet result = statement.getGeneratedKeys();
+            if(result.first()){
+                id = result.getInt(1);
+            }
         } finally {
             try {
                 conn.close();
             } catch (SQLException ignored){}
         }
-        return new User(username, role);
+        return new User(username, role, id);
     }
 
     public User login(String username, String password) throws SQLException {
