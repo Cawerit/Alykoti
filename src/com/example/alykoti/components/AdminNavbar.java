@@ -30,7 +30,7 @@ public class AdminNavbar extends HorizontalLayout {
 
         users = menuBar.addItem("Users", FontAwesome.USER, null);
         users.setDescription("Manage users");
-        users.addItem("Add user", FontAwesome.PLUS, new AddUserCommand(this::addUserToList));
+        users.addItem("Add user", FontAwesome.PLUS, new AddUserCommand(this::test));
 
         try {
             User.query().forEach(this::addUserToList);
@@ -44,6 +44,10 @@ public class AdminNavbar extends HorizontalLayout {
     //Menu click handlers
     private void addUserToList(User u){
         users.addItem(u.getUsername(), null, (MenuItem selectedItem) -> {});
+    }
+
+    private void test(User u){
+
     }
 
 }

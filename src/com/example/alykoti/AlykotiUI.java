@@ -3,6 +3,7 @@ package com.example.alykoti;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.example.alykoti.services.AuthService;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.navigator.Navigator;
@@ -37,9 +38,10 @@ public class AlykotiUI extends UI {
 		NAVIGATOR.addView(ADMINTOP, new AdminTopView());
 		NAVIGATOR.addView(USERVIEW, new UserView());
 		NAVIGATOR.addView(ROOMVIEW, new RoomView());
-		NAVIGATOR.addView(USERGROUPSVIEW, new AppView());
+		NAVIGATOR.addView(USERGROUPSVIEW, new AppView(AuthService.Role.ADMIN));
 		NAVIGATOR.setErrorView(new ErrorView());
-		
+
+		setPollInterval(1000);
 		
 		setContent(new LoginView());
 

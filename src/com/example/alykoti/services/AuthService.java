@@ -59,6 +59,10 @@ public class AuthService {
             } catch (SQLException ignored){}
         }
     }
+    //TODO: logout logic
+    public void logout(){
+
+    }
 
     private static final String SIGNUP_STATEMENT =
             "INSERT INTO users (username, password, role, salt) SELECT ?, SHA2(?, 224), ?, ?";
