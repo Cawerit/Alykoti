@@ -3,6 +3,7 @@ package com.example.alykoti.commands;
 import com.example.alykoti.models.Home;
 import com.vaadin.ui.*;
 
+import java.sql.SQLException;
 import java.util.function.Consumer;
 
 public class AddHomeCommand implements MenuBar.Command {
@@ -27,8 +28,13 @@ public class AddHomeCommand implements MenuBar.Command {
             @Override
             public void buttonClick(Button.ClickEvent event) {
                 Home home = new Home(housename.getValue());
-                onSave.accept(home);
-                subWindow.close();
+                try {
+                    home.save();
+                    onSave.accept(home);
+                    subWindow.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         });
         subContent.addComponent(add);

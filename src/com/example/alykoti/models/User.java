@@ -34,7 +34,7 @@ public class User {
     }
 
     /**
-     * Gets all users from the db
+     * Hakee kaikki käyttäjät tietokannasta
      * @return
      */
     public static List<User> query() throws SQLException {

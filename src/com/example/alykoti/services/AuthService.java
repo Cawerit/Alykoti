@@ -94,7 +94,6 @@ public class AuthService {
     public User getCurrentUser(){
         UI ui = AlykotiUI.getCurrent();
         Object value = ui.getSession().getAttribute(CURRENT_USER_SESSION_VAR);
-        System.out.println("Get current user " + value);
         return value == null ? null : (User) value;
     }
 

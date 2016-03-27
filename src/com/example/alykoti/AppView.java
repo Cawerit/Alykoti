@@ -23,8 +23,6 @@ public class AppView extends VerticalLayout implements View {
     private User currentUser;
     //Yläpalkki
     private HorizontalLayout navBar;
-    //Yläpalkin valikko käyttäjän asetuksille
-    private MenuBar userSettings;
 
     public AppView(AuthService.Role accessibleForRole){
         this.accessibleForRole = accessibleForRole;
@@ -32,23 +30,10 @@ public class AppView extends VerticalLayout implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        User current = AuthService.getInstance().getCurrentUser();
-        if(current == null){
+        this.currentUser = AuthService.getInstance().getCurrentUser();
+        if(currentUser == null){
             AlykotiUI.NAVIGATOR.navigateTo("");
-        } else if(!current.equals(currentUser)){
-            changeUser(current);
-        }
-        currentUser = current;
-    }
-
-    /**
-     * Päivittää navipalkin kun tarpeen (esim käyttäjän vaihtuessa)
-     * @param currentUser Uusi kirjautunut käyttäjä
-     */
-    private void changeUser(@NotNull User currentUser){
-        if(this.currentUser == null || currentUser.getRole() != this.currentUser.getRole()){
-            //Käyttäjätaso eri, koko navipalkki pitää vetää uusiksi
-            this.currentUser = currentUser;
+        } else {
             HorizontalLayout newNavBar = currentUser.getRole() == AuthService.Role.ADMIN ? new AdminNavbar() : new HorizontalLayout();
             if(navBar == null){
                 addComponent(newNavBar);
@@ -56,24 +41,18 @@ public class AppView extends VerticalLayout implements View {
                 replaceComponent(navBar, newNavBar);
             }
             this.navBar = newNavBar;
+            MenuBar userSettings = new MenuBar();
+            MenuBar.MenuItem settings = userSettings.addItem(currentUser.getUsername(), FontAwesome.USER, null);
+            settings.setDescription("Käyttäjän asetukset");
+            settings.addItem("Profiili", FontAwesome.GEAR, null);//TODO: Käyttäjän asetussivu
+            settings.addItem("Kirjaudu ulos", FontAwesome.SIGN_OUT, click -> {
+                AuthService.getInstance().logout();
+                AlykotiUI.NAVIGATOR.navigateTo("");
+            });
+            //Muutetaan navbarin käyttäjänhallinta
+            navBar.addComponent(userSettings);
+            navBar.setComponentAlignment(userSettings, Alignment.MIDDLE_RIGHT);
         }
-        //Vaikka käyttäjätaso ei vaihtuisi, pitää ainakin käyttäjän omat asetukset vaihtaa
-        MenuBar newUserSettingsBar = new MenuBar();
-        MenuBar.MenuItem settings = newUserSettingsBar.addItem(currentUser.getUsername(), FontAwesome.USER, null);
-        settings.setDescription("Käyttäjän asetukset");
-        settings.addItem("Profiili", FontAwesome.GEAR, null);//TODO: Käyttäjän asetussivu
-        settings.addItem("Kirjaudu ulos", FontAwesome.SIGN_OUT, click -> {
-            AuthService.getInstance().logout();
-            AlykotiUI.NAVIGATOR.navigateTo("");
-        });
-        //Muutetaan navbarin käyttäjänhallinta
-        if(userSettings == null){
-            navBar.addComponent(newUserSettingsBar);
-        } else {
-            navBar.replaceComponent(userSettings, newUserSettingsBar);
-        }
-        this.userSettings = newUserSettingsBar;
-        navBar.setComponentAlignment(userSettings, Alignment.MIDDLE_RIGHT);
     }
 
 }
