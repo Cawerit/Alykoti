@@ -91,7 +91,7 @@ public class RoomView extends VerticalLayout implements View {
 	}
 	
 	//kutsutaan listalla itemeita tai haetaan huoneen itemit tietokannasta
-	//TODO: metodi joka lisaa kaikenlaisia Itemeita tauluun
+	//TODO: metodi joka lisaa kaikki huoneessa olevat itemit tauluun
 	private void addToTable (String name, Layout representation){
 		Object newItem = roomTable.addItem();
 		Item tableRow = roomTable.getItem(newItem);

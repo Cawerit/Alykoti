@@ -10,14 +10,14 @@ import com.vaadin.ui.HorizontalLayout;
  * Widget to represent SimpleItems
  *
  */
-public class SimpleWidget extends HorizontalLayout{
+public class SimpleComponent extends HorizontalLayout{
 	Button statusButton;
 	
 	/**
 	 * Create a button to represent and alter the state of a SimpleItem
 	 * @param item the SimpleItem to represent
 	 */
-	public SimpleWidget(SimpleItem item) {
+	public SimpleComponent(SimpleItem item) {
 		statusButton = new Button();
 		statusButton.setIcon(item.getIcon());
 		statusButton.addClickListener(new ClickListener(){

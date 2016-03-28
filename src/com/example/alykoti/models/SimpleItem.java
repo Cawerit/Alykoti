@@ -1,6 +1,6 @@
 package com.example.alykoti.models;
 
-import com.example.alykoti.components.SimpleWidget;
+import com.example.alykoti.components.SimpleComponent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Component;
 
@@ -44,8 +44,8 @@ public class SimpleItem implements Item {
 		status = status ? false : true;
 	}
 
-	public SimpleWidget getRepresentation() {
-		return new SimpleWidget(this);
+	public SimpleComponent getRepresentation() {
+		return new SimpleComponent(this);
 	}
 
 	@Override
