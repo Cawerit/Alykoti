@@ -1,5 +1,6 @@
 package com.example.alykoti;
 
+import com.example.alykoti.models.Sensor;
 import com.example.alykoti.models.SimpleItem;
 import com.vaadin.client.ui.Icon;
 import com.vaadin.data.Item;
@@ -12,15 +13,14 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
 public class RoomView extends VerticalLayout implements View {
 	HorizontalLayout bar;
 	VerticalLayout content;
-	Button prev;
-	Button next;
-	Button back;
+	Button prev, next, back;
 	Table roomTable;
 	
 	public RoomView() {
@@ -74,34 +74,31 @@ public class RoomView extends VerticalLayout implements View {
 		
 		roomTable = new Table("Roomnumber");
 		roomTable.addContainerProperty("Item", String.class, null);
-		roomTable.addContainerProperty("Status", Button.class, null);
+		roomTable.addContainerProperty("Status", Layout.class, null);
 		roomTable.setPageLength(roomTable.size());
 		content.addComponent(roomTable);
 		content.setComponentAlignment(roomTable, Alignment.MIDDLE_CENTER);
 		
-		SimpleItem test = new SimpleItem("Test1", 1, FontAwesome.TOGGLE_ON, FontAwesome.TOGGLE_OFF);
-		SimpleItem test2 = new SimpleItem("Test2", 2, FontAwesome.PLAY, FontAwesome.PAUSE);
-		addToTable(test);
-		addToTable(test2);
+		//Testausta
+		Sensor temp = new Sensor("Temperature", 25, 0, 60, "\u00B0 C");
+		Sensor hum = new Sensor("Humidity", 50, 0, 100, "\u0025");
+		SimpleItem test1 = new SimpleItem("Test1", FontAwesome.TOGGLE_ON, FontAwesome.TOGGLE_OFF);
+		SimpleItem test2 = new SimpleItem("Test2", FontAwesome.PLAY, FontAwesome.PAUSE);
+		addToTable(temp.getName(), temp.getRepresentation());
+		addToTable(hum.getName(), hum.getRepresentation());
+		addToTable(test1.getName(), test1.getRepresentation());
+		addToTable(test2.getName(), test2.getRepresentation());
 	}
 	
 	//kutsutaan listalla itemeita tai haetaan huoneen itemit tietokannasta
-	private void addToTable(SimpleItem test){
+	//TODO: metodi joka lisaa kaikenlaisia Itemeita tauluun
+	private void addToTable (String name, Layout representation){
 		Object newItem = roomTable.addItem();
 		Item tableRow = roomTable.getItem(newItem);
-		Button statusButton = new Button();
-		statusButton.setIcon(test.getIcon());
-		statusButton.addClickListener(new ClickListener(){
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				test.changeValue();
-				statusButton.setIcon(test.getIcon()); //olis kiva jos tahan sais laitettua valueChangeListenerin tjsp
-			}
-			
-		});
-		tableRow.getItemProperty("Item").setValue(test.getName());
-		tableRow.getItemProperty("Status").setValue(statusButton);
+		
+		
+		tableRow.getItemProperty("Item").setValue(name);
+		tableRow.getItemProperty("Status").setValue(representation);
 	}
 
 	@Override
