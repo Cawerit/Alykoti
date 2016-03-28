@@ -23,6 +23,10 @@ public class Home {
 	public Home(String name){
 		this(name, null);
 	}
+	public Home(Integer id) { this(null, id); }
+	public Home(){
+		this(null, null);
+	}
 
 	public void save() throws SQLException {
 		Integer generatedId = DatabaseService.getInstance().useConnection((conn) -> {
@@ -66,10 +70,10 @@ public class Home {
 
 	public static Home get(Integer id) throws SQLException {
 		assert id != null : "Can't execute a get without id! Use query instead.";
-
+		System.out.println("Query home "+ id);
 		return DatabaseService.getInstance().useConnection(conn -> {
 			PreparedStatement statement = conn
-					.prepareStatement(QUERY_HOMES_STATEMENT + " WHERE h.id = ?;");
+					.prepareStatement(QUERY_HOMES_STATEMENT + " WHERE id = ?;");
 			statement.setInt(1, id);
 			ResultSet result = statement.executeQuery();
 			if(result.first()){
@@ -83,9 +87,7 @@ public class Home {
 	}
 
 	private static final String QUERY_HOMES_STATEMENT =
-			"SELECT h.id as id, h.name as name, r.name, r.id FROM " +
-				"homes h " +
-					"LEFT JOIN rooms r ON h.id = r.home";
+			"SELECT id, name FROM homes";
 		
 	public String getName(){ return name; }
 	public Integer getId() { return id; }

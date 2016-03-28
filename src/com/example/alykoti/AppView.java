@@ -26,6 +26,8 @@ public class AppView extends VerticalLayout implements View {
 
     public AppView(AuthService.Role accessibleForRole){
         this.accessibleForRole = accessibleForRole;
+        this.navBar = new HorizontalLayout();
+        addComponent(navBar);
     }
 
     @Override
