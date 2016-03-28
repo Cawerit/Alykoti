@@ -14,7 +14,7 @@ import com.vaadin.ui.Button.ClickListener;
  * Widget that represents the state of a Sensor with a ProgressBar
  *
  */
-public class SensorWidget extends VerticalLayout {
+public class SensorComponent extends VerticalLayout {
 	private Sensor sensor;
 	private ProgressBar bar;
 	private HorizontalLayout buttons;
@@ -27,7 +27,7 @@ public class SensorWidget extends VerticalLayout {
 	 * Add ProgressBar and Label to represent Sensor value and buttons to alter it
 	 * @param sensor the Sensor to represent
 	 */
-	public SensorWidget(Sensor sensor) {
+	public SensorComponent(Sensor sensor) {
 		this.sensor = sensor;
 		this.currentValue = sensor.getValue();
 		this.minValue = sensor.getMinValue();

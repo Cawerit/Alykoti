@@ -1,6 +1,6 @@
 package com.example.alykoti.models;
 
-import com.example.alykoti.components.SensorWidget;
+import com.example.alykoti.components.SensorComponent;
 import com.vaadin.ui.Layout;
 
 /**
@@ -54,7 +54,7 @@ public class Sensor implements Item{
 
 	@Override
 	public Layout getRepresentation() {
-		return new SensorWidget(this);
+		return new SensorComponent(this);
 	}
 
 	@Override
