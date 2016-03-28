@@ -54,20 +54,38 @@ public class Home {
 	public static List<Home> query() throws SQLException {
 		return DatabaseService.getInstance().useConnection((conn) -> {
 			ResultSet result = conn
-					.prepareStatement(QUERY_HOMES_STATEMENT)
+					.prepareStatement(QUERY_HOMES_STATEMENT + ";")
 					.executeQuery();
 			ArrayList<Home> homes = new ArrayList<>();
 			while(result.next()){
-				homes.add(new Home(result.getString("name"), result.getInt("id")));
+				homes.add(fromResultSet(result));
 			}
 			return homes;
 		});
 	}
 
+	public static Home get(Integer id) throws SQLException {
+		assert id != null : "Can't execute a get without id! Use query instead.";
+
+		return DatabaseService.getInstance().useConnection(conn -> {
+			PreparedStatement statement = conn
+					.prepareStatement(QUERY_HOMES_STATEMENT + " WHERE h.id = ?;");
+			statement.setInt(1, id);
+			ResultSet result = statement.executeQuery();
+			if(result.first()){
+				return fromResultSet(result);
+			} else return null;
+		});
+	}
+
+	public static Home fromResultSet(ResultSet result) throws SQLException {
+		return new Home(result.getString("name"), result.getInt("id"));
+	}
+
 	private static final String QUERY_HOMES_STATEMENT =
 			"SELECT h.id as id, h.name as name, r.name, r.id FROM " +
 				"homes h " +
-					"LEFT JOIN rooms r ON h.id = r.home;";
+					"LEFT JOIN rooms r ON h.id = r.home";
 		
 	public String getName(){ return name; }
 	public Integer getId() { return id; }

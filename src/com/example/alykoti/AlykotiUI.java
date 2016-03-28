@@ -3,7 +3,6 @@ package com.example.alykoti;
 
 import javax.servlet.annotation.WebServlet;
 
-import com.example.alykoti.services.AuthService;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.navigator.Navigator;
@@ -16,12 +15,14 @@ import com.vaadin.ui.UI;
 @Theme("alykoti")
 public class AlykotiUI extends UI {
 
-	static Navigator NAVIGATOR;
+	public static Navigator NAVIGATOR;
 	//tyyppiturvallisuuden takia:
-	protected static final String ADMINTOP = "adminTop";
-	protected static final String USERVIEW = "user";
-	protected static final String ROOMVIEW = "room";
-	static final String USERGROUPSVIEW = "user-groups";
+	public static final String
+			ADMINTOP = "adminTop",
+			USERVIEW = "user",
+			ROOMVIEW = "room",
+			HOME_VIEW = "home",
+			ADMIN_DASHBOARD_VIEW = "admin-dashboard";
 	
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class)
@@ -38,7 +39,9 @@ public class AlykotiUI extends UI {
 		NAVIGATOR.addView(ADMINTOP, new AdminTopView());
 		NAVIGATOR.addView(USERVIEW, new UserView());
 		NAVIGATOR.addView(ROOMVIEW, new RoomView());
-		NAVIGATOR.addView(USERGROUPSVIEW, new AppView(AuthService.Role.ADMIN));
+		NAVIGATOR.addView(HOME_VIEW, new HomeView());
+		NAVIGATOR.addView(ADMIN_DASHBOARD_VIEW, AdminDashboardView.class);
+
 		NAVIGATOR.setErrorView(new ErrorView());
 
 		setPollInterval(1000);
@@ -47,11 +50,6 @@ public class AlykotiUI extends UI {
 
 		
 		}
-	
-	
-	
-  
-    
 }
 
 
