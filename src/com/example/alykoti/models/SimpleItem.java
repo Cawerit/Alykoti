@@ -1,29 +1,27 @@
 package com.example.alykoti.models;
 
+import com.example.alykoti.components.SimpleComponent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.Component;
 
-
-public class SimpleItem {
+/**
+ * Items that can be represented with a simple on/off button
+ */
+public class SimpleItem implements Item {
 	private String name;
 	private int id;
 	private FontAwesome iconOn;
 	private FontAwesome iconOff;
 	private boolean status;
 	
-	public SimpleItem(String name, int id, FontAwesome iconOn, FontAwesome iconOff) {
+	public SimpleItem(String name, FontAwesome iconOn, FontAwesome iconOff) {
 		this.name = name;
-		this.id = id;
+		//this.id = edellinenid++;
 		this.iconOn = iconOn;
 		this.iconOff = iconOff;
 		status = false;
 	}
 
-	public String getName() {
-		return name;
-	}
-	public int getId() {
-		return id;
-	}
 	public boolean isStatus() {
 		return status;
 	}
@@ -32,13 +30,6 @@ public class SimpleItem {
 		return iconOff;
 	}
 	
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
 	public void setIconOn(FontAwesome iconOn) {
 		this.iconOn = iconOn;
 	}
@@ -51,5 +42,29 @@ public class SimpleItem {
 
 	public void changeValue(){
 		status = status ? false : true;
+	}
+
+	public SimpleComponent getRepresentation() {
+		return new SimpleComponent(this);
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public int getId() {
+		return id;
+	}
+
+	@Override
+	public void setId(int id) {
+		this.id = id;
 	}
 }
