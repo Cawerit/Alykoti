@@ -2,7 +2,6 @@ package com.example.alykoti;
 
 import com.example.alykoti.models.User;
 import com.example.alykoti.services.AuthService;
-import com.example.alykoti.services.DatabaseService;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -36,7 +35,8 @@ public class LoginView extends VerticalLayout implements View {
                     e.printStackTrace();
                 }
                 if(user != null){
-                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMINTOP);
+//                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMINTOP);
+                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMIN_DASHBOARD_VIEW);
                     else AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERVIEW);
                 } else {
                     Notification.show("Kayttajatunnus tai salasana vaarin", Notification.Type.WARNING_MESSAGE);

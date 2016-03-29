@@ -1,21 +1,40 @@
 package com.example.alykoti.models;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
-public class Room {
-	private String name;
+public class Room extends Resource<Room> {
+
+	@Column String name;
+	@Column Integer home;//Id sille kodille johon tämä viittaa
+
+	private Integer id;
+
 	private ArrayList<Sensor> sensors;
 	private ArrayList<Item> items;
-	private int initialTemp = 21;
-	private int initialHum = 50;
 
-	public Room(String name) {
-		this.name = name;
-		//Huoneilla voi olla luotaessa jo oletussensoreita?
-		//sensors = new ArrayList<Sensor>();
-		//sensors.add(new Sensor("Temperature", initialTemp, 0, 60, "\u00B0 C"));
-		//sensors.add(new Sensor("Humidity", initialHum, 0, 100, "\u0025"));
+	public Room(String name, Integer id){
+		super(Room.class, "rooms");
+		setName(name);
+		setId(id);
 	}
+
+	public List<Device> getDevices() throws SQLException {
+		return this.getDevices(new Device());
+	}
+
+	public List<Device> getDevices(Device like) throws SQLException {
+		Integer prev = like.getRoom();
+		like.setRoom(getId());
+		List<Device> res = like.query();
+		like.setRoom(prev);
+		return res;
+	}
+
+	public Room(String name) { this(name, null); }
+	public Room(Integer id){ this(null, id); }
+	public Room(){ this(null, null); }
 
 	public String getName() {
 		return name;
@@ -24,7 +43,7 @@ public class Room {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public ArrayList<Sensor> getSensors() {
 		return sensors;
 	}
@@ -41,7 +60,16 @@ public class Room {
 		this.items = items;
 	}
 
+	public Integer getHomeId(){ return home; }
+	public void setHomeId(Integer homeId){ this.home = homeId; }
 
 
-
+	@Override
+	public Integer getId() {
+		return id;
+	}
+	@Override
+	public void setId(Integer id) {
+		this.id = id;
+	}
 }

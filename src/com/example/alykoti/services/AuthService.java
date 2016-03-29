@@ -1,33 +1,38 @@
 package com.example.alykoti.services;
 
+import com.example.alykoti.AlykotiUI;
 import com.example.alykoti.models.User;
+import com.vaadin.ui.UI;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.UUID;
 
 public class AuthService {
 
     public User signup(String username, String password, Role role) throws SQLException {
         String salt = genSalt();
+        Integer id = null;
         Connection conn = databaseService
                 .getConnection();
         try {
             PreparedStatement statement = conn
-                    .prepareStatement(SIGNUP_STATEMENT);
+                    .prepareStatement(SIGNUP_STATEMENT, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, username);
             statement.setString(2, password + salt);
             statement.setString(3, role.toString());
             statement.setString(4, salt);
             statement.execute();
+
+            ResultSet result = statement.getGeneratedKeys();
+            if(result.first()){
+                id = result.getInt(1);
+            }
         } finally {
             try {
                 conn.close();
             } catch (SQLException ignored){}
         }
-        return new User(username, role);
+        return new User(username, role, id);
     }
 
     public User login(String username, String password) throws SQLException {
@@ -41,7 +46,9 @@ public class AuthService {
 
             ResultSet result = statement.executeQuery();
             if (result.first()) {
-                return new User(result.getString("username"), Role.fromString(result.getString("role")));
+                User user = User.fromResultSet(result);
+                setCurrentUser(user);
+                return user;
             } else {
                 System.out.println("No user was found");
                 return null;//No users with that name & password
@@ -52,12 +59,16 @@ public class AuthService {
             } catch (SQLException ignored){}
         }
     }
+    //TODO: logout logic
+    public void logout(){
+
+    }
 
     private static final String SIGNUP_STATEMENT =
             "INSERT INTO users (username, password, role, salt) SELECT ?, SHA2(?, 224), ?, ?";
 
     private static final String LOGIN_STATEMENT =
-            "SELECT username, role " +
+            "SELECT username, role, id " +
                     "FROM users " +
                     "WHERE username = ? AND password = SHA2(CONCAT(?, salt), 224);";
 
@@ -76,6 +87,20 @@ public class AuthService {
     public static AuthService getInstance() {
         if(instance == null) instance = new AuthService(DatabaseService.getInstance());
         return instance;
+    }
+
+    private static final String CURRENT_USER_SESSION_VAR = "CURRENT_USER";
+
+    public User getCurrentUser(){
+        UI ui = AlykotiUI.getCurrent();
+        Object value = ui.getSession().getAttribute(CURRENT_USER_SESSION_VAR);
+        return value == null ? null : (User) value;
+    }
+
+    private void setCurrentUser(User user){
+        System.out.println("Set current user");
+        UI ui = AlykotiUI.getCurrent();
+        ui.getSession().setAttribute(CURRENT_USER_SESSION_VAR, user);
     }
 
     /**

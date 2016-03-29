@@ -1,5 +1,7 @@
 package com.example.alykoti;
 
+import com.example.alykoti.models.Device;
+import com.example.alykoti.models.Room;
 import com.example.alykoti.models.Sensor;
 import com.example.alykoti.models.SimpleItem;
 import com.vaadin.client.ui.Icon;
@@ -17,6 +19,8 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
+import java.sql.SQLException;
+
 public class RoomView extends VerticalLayout implements View {
 	HorizontalLayout bar;
 	VerticalLayout content;
@@ -24,7 +28,7 @@ public class RoomView extends VerticalLayout implements View {
 	Table roomTable;
 	
 	public RoomView() {
-		
+
 		bar = new HorizontalLayout();
 		bar.setSpacing(false);
 		bar.setWidth("100%");
@@ -103,7 +107,7 @@ public class RoomView extends VerticalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
-
+		
 	}
 
 }

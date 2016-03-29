@@ -41,7 +41,7 @@ public class SimpleItem implements Item {
 	}
 
 	public void changeValue(){
-		status = status ? false : true;
+		status = !status;
 	}
 
 	public SimpleComponent getRepresentation() {
