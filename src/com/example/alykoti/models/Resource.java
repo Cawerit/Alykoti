@@ -68,7 +68,7 @@ public abstract class Resource<T extends Resource> {
 		try {
 			conn = DatabaseService.getInstance().getConnection();
 			String sql = "SELECT " + getColumnString(fields, true) + " FROM " + tableName +
-					" WHERE id = ?";
+					" WHERE id = ? LIMIT 1";
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setInt(1, getId());
 			ResultSet results = statement.executeQuery();
@@ -179,8 +179,17 @@ public abstract class Resource<T extends Resource> {
 	 */
 	public void update() throws SQLException {
 		assert getId() != null : "Can't execute update without id! Use create() instead.";
-		save(false);
+		save(false, false);
 		setSynced(true);
+	}
+
+	/**
+	 * Päivittää tietokannan tietueen vastaamaan tämän olion tilaa, jättäen kuitenkin
+	 * huomiotta arvot jotka ovat tässä oliosssa `null`.
+	 * @throws SQLException
+	 */
+	public void execute() throws SQLException {
+		save(false, true);
 	}
 
 	/**
@@ -188,7 +197,7 @@ public abstract class Resource<T extends Resource> {
 	 * @throws SQLException
 	 */
 	public void create() throws SQLException {
-		save(true);
+		save(true, false);
 		setSynced(true);
 	}
 
@@ -198,7 +207,7 @@ public abstract class Resource<T extends Resource> {
 	 * @param newItem Onko kyseessä uuden tietueen luonti? Jos false, tulee tietokannasta löytyä olion id:llä tietue.
 	 * @throws SQLException
 	 */
-	private void save(boolean newItem) throws SQLException {
+	private void save(boolean newItem, boolean skipNulls) throws SQLException {
 
 		Connection conn = null;
 		try {
@@ -212,34 +221,60 @@ public abstract class Resource<T extends Resource> {
 				//Asetetaan PreparedStatementiin tarvittava määrä ?-merkkejä
 				StringJoiner placeholders = new StringJoiner(",");
 				for(int i=0, n=fields.size(); i<n; i++) placeholders.add("?");
+
 				String fieldStr = getColumnString(fields, false);
 				sql = "INSERT INTO " + tableName + " (" + fieldStr + ") VALUES (" + placeholders.toString() + ");";
 				statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
 			} else {
+				int totalParamLength = 0;
 				StringJoiner sets = new StringJoiner(",");
-				for(Field f : fields){
-					sets.add(f.getName() + " = ?");
+				if(skipNulls){
+					for(int i=0, n=fields.size(); i<n; i++){
+						Object value = null;
+						Field f = fields.get(i);
+						try {
+							value = f.get(this);
+						} catch (IllegalAccessException e) {
+							e.printStackTrace();
+						}
+						if(value != null){
+							sets.add(f.getName() + " = ?");
+							totalParamLength++;
+						}
+					}
+				} else {
+					totalParamLength = fields.size();
+					for (Field f : fields) {
+						sets.add(f.getName() + " = ?");
+					}
 				}
 				sql = "UPDATE " + tableName + " SET " + sets.toString() + " WHERE id = ?;";
 				statement = conn.prepareStatement(sql);
+				statement.setInt(totalParamLength+1, getId());
 			}
 
 			try {
-				for (int i=0, n=fields.size(); i<n; i++) {
-					Field f = fields.get(i);
+				int index = 1;
+				for (Field f : fields) {
 					Object value = f.get(this);
-					int type = f.getAnnotation(Column.class).sqlType();
-
 					if(value == null){
-						statement.setNull(i+1, type);
+						if(!skipNulls) {
+							int type = f.getAnnotation(Column.class).sqlType();
+							statement.setNull(index, type);
+							index++;
+						}
 					} else {
-						statement.setObject(i+1, value, type);
+						int type = f.getAnnotation(Column.class).sqlType();
+						statement.setObject(index, value, type);
+						index++;
 					}
 				}
 			} catch(IllegalAccessException e){
 				e.printStackTrace();
 			}
+
+			logQuery(statement);
 
 			//Statement valmis, suoritetaan
 			statement.execute();
@@ -250,7 +285,6 @@ public abstract class Resource<T extends Resource> {
 					this.setId(results.getInt(1));
 				}
 			}
-			logQuery(statement);
 		} finally {
 			if(conn != null) {
 				try {
@@ -266,7 +300,8 @@ public abstract class Resource<T extends Resource> {
 	 */
 	private List<Field> getColumnFields(){
 		List<Field> result = new ArrayList<>();
-		for(Field field : resourceType.getFields()){
+
+		for(Field field : resourceType.getDeclaredFields()){
 			if(field.isAnnotationPresent(Column.class)) {
 				result.add(field);
 			}
@@ -304,4 +339,21 @@ public abstract class Resource<T extends Resource> {
 
 	public abstract Integer getId();
 	public abstract void setId(Integer id);
+
+	@Override
+	public String toString(){
+		List<Field> fields = getColumnFields();
+		StringJoiner result = new StringJoiner(", ");
+		for(Field f : fields){
+			Object val = null;
+			try {
+				val = f.get(this);
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			result.add(f.getName() + ": " + (val == null ? "null" : val.toString()));
+		}
+		return "{ id: " + getId() + ", " + result.toString() + " }";
+	}
+
 }

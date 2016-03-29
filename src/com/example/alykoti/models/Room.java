@@ -1,5 +1,6 @@
 package com.example.alykoti.models;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,19 @@ public class Room extends Resource<Room> {
 		setName(name);
 		setId(id);
 	}
+
+	public List<Device> getDevices() throws SQLException {
+		return this.getDevices(new Device());
+	}
+
+	public List<Device> getDevices(Device like) throws SQLException {
+		Integer prev = like.getRoom();
+		like.setRoom(getId());
+		List<Device> res = like.query();
+		like.setRoom(prev);
+		return res;
+	}
+
 	public Room(String name) { this(name, null); }
 	public Room(Integer id){ this(null, id); }
 	public Room(){ this(null, null); }

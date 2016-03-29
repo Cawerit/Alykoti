@@ -83,10 +83,6 @@ public class User extends Resource<User> {
     }
 
     @Override
-    public String toString(){
-        return "User { id " + getId() + ", username: " + getUsername() + ", role: " + getRole().toString() + " }";
-    }
-    @Override
     public boolean equals(Object o){
         Integer id = getId();
         return (o != null && o instanceof User && id != null) && id.equals(((User) o).getId());

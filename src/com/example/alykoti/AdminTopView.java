@@ -41,7 +41,7 @@ public class AdminTopView extends VerticalLayout implements View {
        	users.addItem("Add user", FontAwesome.PLUS, addUser());
 
 		try {
-			User.query().forEach(this::addUserToList);
+			new User().query().forEach(this::addUserToList);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -98,6 +98,10 @@ public class AdminTopView extends VerticalLayout implements View {
 	}
 
 	private void addUserToList(User u){
+		if(u == null || u.getUsername() == null){
+			System.out.println("voih " + (u == null ? "null" : u.toString()));
+			return;
+		}
 		users.addItem(u.getUsername(), null, (MenuItem selectedItem) -> {
 				if (content.getComponentCount() > 0) content.removeAllComponents();
 				viewUser(u.getId().toString());

@@ -35,7 +35,7 @@ public class AdminNavbar extends HorizontalLayout {
         users.addItem("Add user", FontAwesome.PLUS, new AddUserCommand(this::addUserToList));
 
         try {
-            User.query().forEach(this::addUserToList);
+            new User().query().forEach(this::addUserToList);
             new Home().query().forEach(this::addHomeToList);
         } catch (SQLException e) {
             e.printStackTrace();
