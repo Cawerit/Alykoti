@@ -107,14 +107,7 @@ public class RoomView extends VerticalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
-		try {//Debug
-			Device a = new Device(1);
-			a.setRoom(3);
-			a.execute();
-			System.out.println();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		
 	}
 
 }

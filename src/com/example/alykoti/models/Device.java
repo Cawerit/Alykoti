@@ -42,4 +42,68 @@ public class Device extends Resource<Device> {
 	public void setId(Integer id) {
 		this.id = id;
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public Integer getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Integer userId) {
+		this.userId = userId;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getStatusType() {
+		return statusType;
+	}
+
+	public void setStatusType(String statusType) {
+		this.statusType = statusType;
+	}
+
+	public String getStatusValueStr() {
+		return statusValueStr;
+	}
+
+	public void setStatusValueStr(String statusValueStr) {
+		this.statusValueStr = statusValueStr;
+	}
+
+	public Integer getStatusValueNumber() {
+		return statusValueNumber;
+	}
+
+	public void setStatusValueNumber(Integer statusValueNumber) {
+		this.statusValueNumber = statusValueNumber;
+	}
+
+	public java.sql.Date getUpdated() {
+		return updated;
+	}
+
+	public void setUpdated(java.sql.Date updated) {
+		this.updated = updated;
+	}
 }
