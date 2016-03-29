@@ -7,6 +7,7 @@ import com.example.alykoti.services.AuthService;
 import com.sun.istack.internal.Nullable;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -55,18 +56,6 @@ public class HomeView extends AppView {
 			//Callback lis√§√§ uuden huoneen listaan
 			TabSheet.Tab newTab = accordion.addTab(new RoomComponent(room), room.getName());
 		}), "Lis‰‰ huone", FontAwesome.PLUS);
-
-		//Nappi, jolla siirryt‰‰n huonen‰kym‰‰n
-		roomButton.setCaption("Open Room View");
-		roomButton.setIcon(FontAwesome.EYE);
-		roomButton.addClickListener(new ClickListener(){
-			@Override
-			public void buttonClick(ClickEvent event) {
-				//TODO: uri-fragmentilla(?) oikeaan taloon
-				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId); // + "/" + roomId
-			}
-		});
-		
 		
         Home home = new Home(homeId);
 		try {
@@ -78,6 +67,24 @@ public class HomeView extends AppView {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	
+		//Nappi, jolla siirryt‰‰n huonen‰kym‰‰n
+		roomButton.setCaption("Open Room View");
+		roomButton.setIcon(FontAwesome.EYE);
+		roomButton.addClickListener(new ClickListener(){
+			@Override
+			public void buttonClick(ClickEvent event) {
+				//Menn‰‰n nyt uri-fragmentilla kodin ensimm‰iseen huoneeseen
+				int firstRoomId = 0;
+				try {
+					firstRoomId = home.getRooms().get(0).getId();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + firstRoomId);
+			}
+		});
+		
     }
 
 }
