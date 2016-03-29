@@ -1,7 +1,7 @@
 package com.example.alykoti.models;
 
 import com.example.alykoti.services.DatabaseService;
-import com.sun.corba.se.spi.orbutil.fsm.Guard;
+import com.mysql.fabric.xmlrpc.base.Data;
 import com.sun.istack.internal.NotNull;
 
 import java.lang.annotation.ElementType;
@@ -11,33 +11,64 @@ import java.lang.annotation.Target;
 import java.lang.reflect.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.StringJoiner;
 
 /**
  * Yläluokka kaikille tietokantaan tallennettaville objekteille.
  * Sisältää muutamia hyödyllisiä apuvälineitä perus CRUD operaatioihin.
  * Ei mikään täydellinen querybuilderkirjasto, mutta toimii tässä projektissa.
+ * HUOM! Perivän luokan on täytettävä myös seuraavat vaatimukset:
+ *  - Parametriton konstruktori (uusia instansseja luodaan Constructor.newInstance()-kutsulla)
+ *  - Joukko luokkamuuttujia joiden näkyvyys on vähintään `protected` ja joissa on annotaatio Resource.Column
+ *  - Integer id on kaikille Resource-objekteille pakollinen tieto eikä sitä tule erikseen määrittää annotaatiolla
  */
 public abstract class Resource<T extends Resource> {
 
 	private final String tableName;
 	private Class<T> resourceType;
 
-	public Resource(Class<T> resourceType, @NotNull String tableName){
+	public Resource(@NotNull Class<T> resourceType, @NotNull String tableName){
 		this.resourceType = resourceType;
 		this.tableName = tableName;
 	}
 
+
+	@Target(value = ElementType.FIELD)
+	@Retention(value = RetentionPolicy.RUNTIME)
+	/**
+	 * Annotaatio, jolla merkataan tietyn luokkamuuttujan olevan tietokannasta löytyvä sarake.
+	 */
+	public @interface Column {
+		/**
+		 * @return java.sql.Types-tyyppi joka vastaa sarakkeen tyyppiä tietokannassa
+		 */
+		int sqlType() default Types.VARCHAR;
+
+		/**
+		 * @return Vertailuoperaatio jota käytetään vertaillessa tämän sarakkeen
+		 * arvoja toisiinsa queryssa.
+		 */
+		String compareWith() default "=";
+	}
+
+
+	/**
+	 * Täyttää tämän Resource-olion tietokannasta id:n perusteella haettavalla datalla.
+	 * AE: this.getId() != null
+	 * @throws SQLException
+	 */
 	public void pull() throws SQLException {
+
 		assert getId() != null : "Cannot execute get without id! Use query instead.";
 
 		List<Field> fields = getColumnFields();
-		DatabaseService.getInstance().useConnection(conn -> {
+		Connection conn = null;
+		try {
+			conn = DatabaseService.getInstance().getConnection();
 			String sql = "SELECT " + getColumnString(fields, true) + " FROM " + tableName +
 					" WHERE id = ?";
-			System.out.println("Queryyyyy: " + sql);
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setInt(1, getId());
 			ResultSet results = statement.executeQuery();
@@ -46,35 +77,50 @@ public abstract class Resource<T extends Resource> {
 					for (Field f : fields) {
 						f.set(this, results.getObject(f.getName(), f.getType()));
 					}
+					setSynced(true);
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
 				}
 			}
-			return null;
-		});
+			logQuery(statement);
+		} finally {
+			if(conn != null){
+				try{
+					conn.close();
+				} catch (Exception ignored){}
+			}
+		}
 	}
 
+	/**
+	 * Hakee tietokannasta listan tämän Resourcen kaltaisia objekteja.
+	 * Jokainen tämän objektin Column-annotaatiolla varustettu luokkamuuttuja toimii AND-ehtona querylle.
+	 * Esimerkiksi jos tämän olion muuttuja "name" olisi "Jaska", haettaisiin tietokannasta kaikki Jaska-nimiset.
+	 * @return
+	 * @throws SQLException
+	 */
 	public List<T> query() throws SQLException {
 		List<Field> fields = getColumnFields();
 		int fieldsSize = fields.size();
 		Object[] queryValues = new Object[fieldsSize];
 		int[] queryTypes = new int[fieldsSize];
 		StringJoiner placeholders = new StringJoiner(" AND ");
-
+		int index = 0;
 		try {
 			for (Field f : fields) {
 				Object value = f.get(this);
 				if(value != null){
-					placeholders.add(f.getName() + " = ?");
-					int index = queryValues.length;
+					Column annotation = f.getAnnotation(Column.class);
+					placeholders.add(f.getName() + annotation.compareWith() + " ?");
 					queryValues[index] = value;
-					queryTypes[index] = f.getAnnotation(Column.class).sqlType();
+					queryTypes[index] = annotation.sqlType();
+					index++;
 				}
 			}
 		} catch (IllegalAccessException e){
 			e.printStackTrace();
 		}
-		boolean hasParams = placeholders.length() > 0;
+		boolean hasParams = index > 0;
 		Connection conn = null;
 		try {
 			conn = DatabaseService.getInstance().getConnection();
@@ -82,11 +128,10 @@ public abstract class Resource<T extends Resource> {
 			if(hasParams) {
 				sql += " WHERE " + placeholders.toString() + ";";
 			} else sql += ";";
-			System.out.println("query " + sql);
 			PreparedStatement statement = conn
 					.prepareStatement(sql);
 			if(hasParams) {
-				for (int i = 0, n = queryValues.length; i < n; i++) {
+				for (int i = 0; i < index; i++) {
 					Object value = queryValues[i];
 					if (value == null) {
 						break;
@@ -105,15 +150,16 @@ public abstract class Resource<T extends Resource> {
 					T obj = constr.newInstance();
 					obj.setId(results.getInt("id"));
 					for(Field f : fields) {
-						//System.out.println("Get field " + results.getString(f.getName()));
 						f.set(obj, results.getObject(f.getName(), f.getType()));
 					}
+					obj.setSynced(true);
 					queryResults.add(obj);
 				}
 			} catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e){
 				e.printStackTrace();
 			}
 
+			logQuery(statement);
 			return queryResults;
 
 		} finally {
@@ -126,18 +172,38 @@ public abstract class Resource<T extends Resource> {
 
 	}
 
+	/**
+	 * Päivittää tietokannan tietueen vastaamaan tämän olion tilaa.
+	 * AE: Tietokannassa on oltava samalla id:llä varustettu tietue.
+	 * @throws SQLException
+	 */
 	public void update() throws SQLException {
+		assert getId() != null : "Can't execute update without id! Use create() instead.";
 		save(false);
+		setSynced(true);
 	}
 
+	/**
+	 * Luo tietokantaan uuden tietueen, jonka kentät vastaavat tämän olion tilaa.
+	 * @throws SQLException
+	 */
 	public void create() throws SQLException {
 		save(true);
+		setSynced(true);
 	}
 
+	/**
+	 * Yhteinen tallennusmetodi sekä create- että update-metodeille. Erottelu näiden kahden
+	 * toiminnallisuuden välillä tehdään newItem-parametrilla.
+	 * @param newItem Onko kyseessä uuden tietueen luonti? Jos false, tulee tietokannasta löytyä olion id:llä tietue.
+	 * @throws SQLException
+	 */
 	private void save(boolean newItem) throws SQLException {
-		DatabaseService.getInstance().useConnection(conn -> {
-			List<Field> fields = getColumnFields();
 
+		Connection conn = null;
+		try {
+			conn = DatabaseService.getInstance().getConnection();
+			List<Field> fields = getColumnFields();
 			//Generoidaan tallennuksessa käytettävä sql
 			String sql;
 			PreparedStatement statement;
@@ -149,6 +215,7 @@ public abstract class Resource<T extends Resource> {
 				String fieldStr = getColumnString(fields, false);
 				sql = "INSERT INTO " + tableName + " (" + fieldStr + ") VALUES (" + placeholders.toString() + ");";
 				statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
 			} else {
 				StringJoiner sets = new StringJoiner(",");
 				for(Field f : fields){
@@ -157,7 +224,6 @@ public abstract class Resource<T extends Resource> {
 				sql = "UPDATE " + tableName + " SET " + sets.toString() + " WHERE id = ?;";
 				statement = conn.prepareStatement(sql);
 			}
-			System.out.println("Suoritetaan save: " + sql);
 
 			try {
 				for (int i=0, n=fields.size(); i<n; i++) {
@@ -178,19 +244,29 @@ public abstract class Resource<T extends Resource> {
 			//Statement valmis, suoritetaan
 			statement.execute();
 
-			if(newItem) {
+			if(newItem) {//Jos luotiin uusi rivi, haetaan generoitu id
 				ResultSet results = statement.getGeneratedKeys();
 				if (results.first()) {
 					this.setId(results.getInt(1));
 				}
 			}
-			return null;
-		});
+			logQuery(statement);
+		} finally {
+			if(conn != null) {
+				try {
+					conn.close();
+				} catch (Exception ignored){}
+			}
+		}
 	}
 
+	/**
+	 * Hakee kaikki tämän olion luokkamuuttujat joissa on annotaatio Resource.Column
+	 * @return
+	 */
 	private List<Field> getColumnFields(){
 		List<Field> result = new ArrayList<>();
-		for(Field field : resourceType.getDeclaredFields()){
+		for(Field field : resourceType.getFields()){
 			if(field.isAnnotationPresent(Column.class)) {
 				result.add(field);
 			}
@@ -198,6 +274,13 @@ public abstract class Resource<T extends Resource> {
 		return result;
 	}
 
+	/**
+	 * Palauttaa ","-merkillä erotellun listan kentistä joissa on Column-annotaatio.
+	 * Listaan lisätään myös "id" jos `incluldeId` on true.
+	 * @param fields
+	 * @param includeId
+	 * @return
+	 */
 	private String getColumnString(List<Field> fields, boolean includeId){
 		StringJoiner result = new StringJoiner(",");
 		for(Field f : fields){
@@ -207,13 +290,18 @@ public abstract class Resource<T extends Resource> {
 		return result.toString();
 	}
 
-	public abstract Integer getId();
-	public abstract void setId(Integer id);
-
-	@Target(value = ElementType.FIELD)
-	@Retention(value = RetentionPolicy.RUNTIME)
-	public @interface Column {
-		int sqlType();
+	private void logQuery(PreparedStatement statement){
+		System.out.println("Ran query:\n" + statement.toString());
 	}
 
+	private boolean synced = false;
+	public boolean isSynced(){
+		return synced;
+	}
+	protected void setSynced(boolean value){
+		this.synced = value;
+	}
+
+	public abstract Integer getId();
+	public abstract void setId(Integer id);
 }

@@ -29,7 +29,7 @@ public class AddHomeCommand implements MenuBar.Command {
             public void buttonClick(Button.ClickEvent event) {
                 Home home = new Home(housename.getValue());
                 try {
-                    home.save();
+                    home.create();
                     onSave.accept(home);
                     subWindow.close();
                 } catch (SQLException e) {

@@ -36,7 +36,7 @@ public class AdminNavbar extends HorizontalLayout {
 
         try {
             User.query().forEach(this::addUserToList);
-            Home.query().forEach(this::addHomeToList);
+            new Home().query().forEach(this::addHomeToList);
         } catch (SQLException e) {
             e.printStackTrace();
         }

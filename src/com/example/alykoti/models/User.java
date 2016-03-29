@@ -9,17 +9,24 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User {
+public class User extends Resource<User> {
 
-    private String username;
-    private AuthService.Role role;
+	@Column String username;
+    @Column String role;//Resource.Column annotaatio vaatii tämän olevan string
     private Integer id;
+	private AuthService.Role _role;//Säilötään tähän varsinainen Role-enum kun se saadaan
 
     public User(String username, AuthService.Role role, Integer id) {
+		super(User.class, "users");
         this.username = username;
-        this.role = role;
         this.id = id;
+		if(role != null){
+			this._role = role;
+			this.role = role.toString();
+		}
     }
+
+	public User(){ this(null, null, null); }
 
     public User(String username, AuthService.Role role){
         this(username, role, null);
@@ -29,25 +36,19 @@ public class User {
         return username;
     }
     public Integer getId() { return id; }
-    public AuthService.Role getRole() {
-        return role;
-    }
 
-    /**
-     * Hakee kaikki käyttäjät tietokannasta
-     * @return
-     */
-    public static List<User> query() throws SQLException {
-        return DatabaseService.getInstance().useConnection((conn) -> {
-           ResultSet result = conn
-                   .prepareStatement("SELECT id, username, role FROM users")
-                   .executeQuery();
-            ArrayList<User> users = new ArrayList<>();
-            while(result.next()){
-                users.add(User.fromResultSet(result));
-            }
-            return users;
-        });
+	@Override
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public AuthService.Role getRole() {
+        if(_role != null) return _role;
+		else if(role != null) {
+			_role = AuthService.Role.fromString(role);
+			return _role;
+		}
+		else return null;
     }
 
     /**
@@ -58,7 +59,7 @@ public class User {
      */
     public static boolean usernameExists(String username) throws SQLException {
         return DatabaseService.getInstance().useConnection((conn) -> {
-            PreparedStatement statement = conn.prepareStatement(COUNT_USERS_STATEMENT);
+            PreparedStatement statement = conn.prepareStatement("SELECT COUNT(*) FROM users WHERE username = ?");
             statement.setString(1, username);
             ResultSet result = statement.executeQuery();
             return result.first() && result.getInt(1) != 0;
@@ -80,9 +81,6 @@ public class User {
                 result.getInt("id")
         );
     }
-
-    private static final String COUNT_USERS_STATEMENT =
-            "SELECT COUNT(*) FROM users WHERE username = ?";
 
     @Override
     public String toString(){
