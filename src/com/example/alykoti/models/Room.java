@@ -7,7 +7,7 @@ import java.util.List;
 public class Room extends Resource<Room> {
 
 	@Column String name;
-	@Column Integer home;//Id sille kodille johon tämä viittaa
+	@Column(sqlType=java.sql.Types.INTEGER) Integer home;//Id sille kodille johon tämä viittaa
 
 	private Integer id;
 
