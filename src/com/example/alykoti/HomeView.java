@@ -4,7 +4,6 @@ import com.example.alykoti.components.RoomComponent;
 import com.example.alykoti.models.Home;
 import com.example.alykoti.models.Room;
 import com.example.alykoti.services.AuthService;
-import com.sun.istack.internal.Nullable;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -81,7 +80,7 @@ public class HomeView extends AppView {
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
-				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + firstRoomId);
+				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + firstRoomId);
 			}
 		});
 		

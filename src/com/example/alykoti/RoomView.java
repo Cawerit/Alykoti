@@ -31,6 +31,8 @@ public class RoomView extends AppView implements View {
 	public final Button next = new Button();
 	public final Table roomTable = new Table();
 	private Room room = new Room();
+	private Integer roomId = 0;
+	private Integer homeId = 0;
 	
 	public RoomView() {
 		super(AuthService.Role.ADMIN);
@@ -55,6 +57,8 @@ public class RoomView extends AppView implements View {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				//siirry edelliseen huoneeseen
+				int prev = room.getAdjacent(false);
+				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + prev);
 			}
 		});
 		next.setCaption("Next room");
@@ -63,6 +67,8 @@ public class RoomView extends AppView implements View {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				//siirry seuraavaan huoneeseen
+				int next = room.getAdjacent(true);
+				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + next);
 			}
 		});
 		
@@ -76,7 +82,14 @@ public class RoomView extends AppView implements View {
 		buttons.setComponentAlignment(prev, Alignment.TOP_CENTER);
 		buttons.setComponentAlignment(next, Alignment.TOP_CENTER);
 		
-		Integer roomId = Integer.parseInt(event.getParameters());
+		String fragment = event.getParameters();
+		for(int i = 0; i < fragment.length(); i++){
+			if(fragment.charAt(i) == '/'){
+				homeId = Integer.parseInt(fragment.substring(0, i));
+				roomId = Integer.parseInt(fragment.substring(i + 1, fragment.length()));
+			}
+		}
+		 
 		room.setId(roomId);
 		try {
 			room.pull();//Päivitetään huone-olion sisältö tietokannasta
