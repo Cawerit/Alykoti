@@ -72,4 +72,28 @@ public class Room extends Resource<Room> {
 	public void setId(Integer id) {
 		this.id = id;
 	}
+	
+	public int getAdjacent(boolean next){
+		try {
+			Home home = new Home(this.home);
+			home.pull();
+			List<Room> rooms = home.getRooms();
+			int i = 0;
+			for(i = 0; i < rooms.size(); i++){
+				if(this.id == rooms.get(i).getId()){
+					break;
+				}
+			}
+			int roomid = rooms.get(0).getId();
+			if(next) {
+				if(rooms.size() > i + 1) roomid = rooms.get(i + 1).getId();
+			} else if (i == 0) {
+				roomid = rooms.get(rooms.size() - 1).getId();
+			}
+			return roomid;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
 }

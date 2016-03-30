@@ -1,15 +1,16 @@
 package com.example.alykoti;
 
+import com.example.alykoti.components.RoomComponent;
 import com.example.alykoti.models.Device;
+import com.example.alykoti.models.Home;
 import com.example.alykoti.models.Room;
-import com.example.alykoti.models.Sensor;
-import com.example.alykoti.models.SimpleItem;
+import com.example.alykoti.services.AuthService;
+import com.example.alykoti.services.AuthService.Role;
 import com.vaadin.client.ui.Icon;
 import com.vaadin.data.Item;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.FontIcon;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -20,94 +21,96 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
 import java.sql.SQLException;
+import java.util.List;
 
-public class RoomView extends VerticalLayout implements View {
-	HorizontalLayout bar;
-	VerticalLayout content;
-	Button prev, next, back;
-	Table roomTable;
+public class RoomView extends AppView implements View {
+	
+	public final VerticalLayout content = new VerticalLayout();
+	public final HorizontalLayout buttons = new HorizontalLayout();
+	public final Button prev = new Button();
+	public final Button next = new Button();
+	public final Table roomTable = new Table();
+	private Room room = new Room();
+	private Integer roomId = 0;
+	private Integer homeId = 0;
 	
 	public RoomView() {
-
-		bar = new HorizontalLayout();
-		bar.setSpacing(false);
-		bar.setWidth("100%");
-		addComponent(bar);
-		
-		HorizontalLayout left = new HorizontalLayout();
-		
-		prev = new Button("Previous room");
-		prev.setSizeUndefined();
-		prev.setIcon(FontAwesome.CHEVRON_CIRCLE_LEFT);
-		prev.addClickListener(new ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				//siirry edelliseen huoneeseen
-			}
-		});
-		
-		next = new Button("Next room");
-		next.setIcon(FontAwesome.CHEVRON_CIRCLE_RIGHT);
-		next.addClickListener(new ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				//siirry seuraavaan huoneeseen
-			}
-		});
-		
-		back = new Button("Back");
-		back.setIcon(FontAwesome.BACKWARD);
-		back.addClickListener(new ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				//back:in paamaara pitaisi maaraytya sen mukaan, onko kayttaja admin vai ei
-				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMINTOP);
-			}
-		});
-		
-		left.addComponent(prev);
-		left.addComponent(next);
-		bar.addComponent(left);
-		bar.addComponent(back);
-		bar.setComponentAlignment(back, Alignment.TOP_RIGHT);
-		bar.setComponentAlignment(left, Alignment.TOP_LEFT);
-		
-		content = new VerticalLayout();
+		super(AuthService.Role.ADMIN);
 		content.setSizeFull();
 		addComponent(content);
-		
-		roomTable = new Table("Roomnumber");
-		roomTable.addContainerProperty("Item", String.class, null);
-		roomTable.addContainerProperty("Status", Layout.class, null);
-		roomTable.setPageLength(roomTable.size());
 		content.addComponent(roomTable);
+		content.addComponent(buttons);
+		buttons.addComponent(prev);
+		buttons.addComponent(next);
 		content.setComponentAlignment(roomTable, Alignment.MIDDLE_CENTER);
-		
-		//Testausta
-		Sensor temp = new Sensor("Temperature", 25, 0, 60, "\u00B0 C");
-		Sensor hum = new Sensor("Humidity", 50, 0, 100, "\u0025");
-		SimpleItem test1 = new SimpleItem("Test1", FontAwesome.TOGGLE_ON, FontAwesome.TOGGLE_OFF);
-		SimpleItem test2 = new SimpleItem("Test2", FontAwesome.PLAY, FontAwesome.PAUSE);
-		addToTable(temp.getName(), temp.getRepresentation());
-		addToTable(hum.getName(), hum.getRepresentation());
-		addToTable(test1.getName(), test1.getRepresentation());
-		addToTable(test2.getName(), test2.getRepresentation());
+		content.setComponentAlignment(buttons, Alignment.TOP_CENTER);
+		buttons.setComponentAlignment(prev, Alignment.TOP_CENTER);
+		buttons.setComponentAlignment(next, Alignment.TOP_CENTER);
 	}
 	
-	//kutsutaan listalla itemeita tai haetaan huoneen itemit tietokannasta
-	//TODO: metodi joka lisaa kaikki huoneessa olevat itemit tauluun
-	private void addToTable (String name, Layout representation){
-		Object newItem = roomTable.addItem();
-		Item tableRow = roomTable.getItem(newItem);
-		
-		
-		tableRow.getItemProperty("Item").setValue(name);
-		tableRow.getItemProperty("Status").setValue(representation);
-	}
-
 	@Override
 	public void enter(ViewChangeEvent event) {
+		super.enter(event);
 		
+		if(roomTable.size() > 0) roomTable.removeAllItems();
+		roomTable.addContainerProperty("Item", String.class, null);
+		roomTable.addContainerProperty("Status", String.class, null);
+		roomTable.setPageLength(roomTable.size());
+	
+		prev.setCaption("Previous room");
+		prev.setSizeUndefined();
+		prev.setIcon(FontAwesome.CHEVRON_CIRCLE_LEFT);
+		if(next.getListeners(ClickEvent.class).size() == 0) {
+			prev.addClickListener(new ClickListener() {
+				@Override
+				public void buttonClick(ClickEvent event) {
+					//siirry edelliseen huoneeseen
+					int prev = room.getAdjacent(false);
+					AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + prev);
+				}
+			});
+		}
+		next.setCaption("Next room");
+		next.setIcon(FontAwesome.CHEVRON_CIRCLE_RIGHT);
+		if(next.getListeners(ClickEvent.class).size() == 0) {
+			next.addClickListener(new ClickListener() {
+				@Override
+				public void buttonClick(ClickEvent event) {
+					//siirry seuraavaan huoneeseen
+					int next = room.getAdjacent(true);
+					AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + next);
+				}
+			});
+		}
+		
+
+		//Haetaan URL:sta kodin ja huoneen id:t
+		String fragment = event.getParameters();
+		for(int i = 0; i < fragment.length(); i++){
+			if(fragment.charAt(i) == '/'){
+				homeId = Integer.parseInt(fragment.substring(0, i));
+				roomId = Integer.parseInt(fragment.substring(i + 1, fragment.length()));
+			}
+		}
+		 
+		room.setId(roomId);
+		try {
+			room.pull();//Päivitetään huone-olion sisältö tietokannasta
+			roomTable.setCaption(room.getName());
+			List<Device> devices = room.getDevices();
+			for(Device d : devices)
+				addToTable(d);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    }
+	
+	
+	private void addToTable (Device d){
+		Object newItem = roomTable.addItem();
+		Item tableRow = roomTable.getItem(newItem);
+		tableRow.getItemProperty("Item").setValue(d.getName());
+		tableRow.getItemProperty("Status").setValue(d.getStatusValueStr());
 	}
 
 }
