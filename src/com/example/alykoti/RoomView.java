@@ -36,43 +36,8 @@ public class RoomView extends AppView implements View {
 	
 	public RoomView() {
 		super(AuthService.Role.ADMIN);
-		addComponent(content);
-		content.addComponent(roomTable);
-		content.addComponent(buttons);
-		buttons.addComponent(prev);
-		buttons.addComponent(next);
-	}
-	
-	@Override
-	public void enter(ViewChangeEvent event) {
-		super.enter(event);
-		
-		roomTable.addContainerProperty("Item", String.class, null);
-		roomTable.addContainerProperty("Status", String.class, null);
-		roomTable.setPageLength(roomTable.size());
-		prev.setCaption("Previous room");
-		prev.setSizeUndefined();
-		prev.setIcon(FontAwesome.CHEVRON_CIRCLE_LEFT);
-		prev.addClickListener(new ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				//siirry edelliseen huoneeseen
-				int prev = room.getAdjacent(false);
-				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + prev);
-			}
-		});
-		next.setCaption("Next room");
-		next.setIcon(FontAwesome.CHEVRON_CIRCLE_RIGHT);
-		next.addClickListener(new ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				//siirry seuraavaan huoneeseen
-				int next = room.getAdjacent(true);
-				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + next);
-			}
-		});
-		
 		content.setSizeFull();
+		addComponent(content);
 		content.addComponent(roomTable);
 		content.addComponent(buttons);
 		buttons.addComponent(prev);
@@ -81,7 +46,45 @@ public class RoomView extends AppView implements View {
 		content.setComponentAlignment(buttons, Alignment.TOP_CENTER);
 		buttons.setComponentAlignment(prev, Alignment.TOP_CENTER);
 		buttons.setComponentAlignment(next, Alignment.TOP_CENTER);
+	}
+	
+	@Override
+	public void enter(ViewChangeEvent event) {
+		super.enter(event);
 		
+		if(roomTable.size() > 0) roomTable.removeAllItems();
+		roomTable.addContainerProperty("Item", String.class, null);
+		roomTable.addContainerProperty("Status", String.class, null);
+		roomTable.setPageLength(roomTable.size());
+	
+		prev.setCaption("Previous room");
+		prev.setSizeUndefined();
+		prev.setIcon(FontAwesome.CHEVRON_CIRCLE_LEFT);
+		if(next.getListeners(ClickEvent.class).size() == 0) {
+			prev.addClickListener(new ClickListener() {
+				@Override
+				public void buttonClick(ClickEvent event) {
+					//siirry edelliseen huoneeseen
+					int prev = room.getAdjacent(false);
+					AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + prev);
+				}
+			});
+		}
+		next.setCaption("Next room");
+		next.setIcon(FontAwesome.CHEVRON_CIRCLE_RIGHT);
+		if(next.getListeners(ClickEvent.class).size() == 0) {
+			next.addClickListener(new ClickListener() {
+				@Override
+				public void buttonClick(ClickEvent event) {
+					//siirry seuraavaan huoneeseen
+					int next = room.getAdjacent(true);
+					AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + next);
+				}
+			});
+		}
+		
+
+		//Haetaan URL:sta kodin ja huoneen id:t
 		String fragment = event.getParameters();
 		for(int i = 0; i < fragment.length(); i++){
 			if(fragment.charAt(i) == '/'){

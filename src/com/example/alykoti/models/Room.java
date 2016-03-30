@@ -84,11 +84,11 @@ public class Room extends Resource<Room> {
 					break;
 				}
 			}
-			int roomid = 0;
+			int roomid = rooms.get(0).getId();
 			if(next) {
 				if(rooms.size() > i + 1) roomid = rooms.get(i + 1).getId();
 			} else if (i == 0) {
-				roomid = rooms.get(rooms.size()).getId();
+				roomid = rooms.get(rooms.size() - 1).getId();
 			}
 			return roomid;
 		} catch (SQLException e) {
