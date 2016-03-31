@@ -43,7 +43,6 @@ public class AuthService {
                     .prepareStatement(LOGIN_STATEMENT);
             statement.setString(1, username);
             statement.setString(2, password);
-
             ResultSet result = statement.executeQuery();
             if (result.first()) {
                 User user = User.fromResultSet(result);
@@ -59,9 +58,27 @@ public class AuthService {
             } catch (SQLException ignored){}
         }
     }
+    
+    public void updateUser(int id, String username, String password) throws SQLException {
+        String salt = genSalt();
+        Connection conn = databaseService.getConnection();
+        try {
+            PreparedStatement statement = conn
+                    .prepareStatement(UPDATE_STATEMENT);
+            statement.setString(1, username);
+            statement.setString(2, password + salt);
+            statement.setString(3, salt);
+            statement.setInt(4, id);
+            statement.execute();
+        } finally {
+        	try {
+        		conn.close();
+        	} catch(SQLException ignored) {	}
+        }
+    }
+    
     //TODO: logout logic
     public void logout(){
-
     }
 
     private static final String SIGNUP_STATEMENT =
@@ -71,6 +88,10 @@ public class AuthService {
             "SELECT username, role, id " +
                     "FROM users " +
                     "WHERE username = ? AND password = SHA2(CONCAT(?, salt), 224);";
+    
+    private static final String UPDATE_STATEMENT = 
+    		"UPDATE users SET username = ?, password = SHA2(?, 224), salt = ?" +
+    				"WHERE id = ?;";
 
     //DI stuff
     private static AuthService instance;
