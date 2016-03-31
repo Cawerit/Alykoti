@@ -4,11 +4,11 @@ import java.sql.SQLException;
 
 import com.example.alykoti.models.User;
 import com.example.alykoti.services.AuthService;
-import com.example.alykoti.services.AuthService.Role;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
@@ -27,6 +27,9 @@ public class UserInfoView extends AppView {
 	Button save = new Button("Save settings");
 	Button views = new Button("Manage user's views");
 	
+	/**
+	 * Create UserInfoView.
+	 */
 	public UserInfoView() {
 		//TODO: Kayttajan roolin kysely:
 		super(AuthService.Role.ADMIN);
@@ -53,7 +56,7 @@ public class UserInfoView extends AppView {
 		setComponentAlignment(userPanel, Alignment.MIDDLE_CENTER);
 			
 	}
-
+	
 	@Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         super.enter(event);
@@ -65,19 +68,39 @@ public class UserInfoView extends AppView {
 		}
 		userPanel.setCaption(user.getUsername());
 		username.setValue(user.getUsername());
-		
+		old.clear();
+		pass1.clear();
+		pass2.clear();
 		if(save.getListeners(ClickEvent.class).size() == 0) {
 			save.addClickListener(click -> {
-				update(user.getId(), username.getValue(), pass1.getValue());
+				update(user, username.getValue(), old.getValue(), pass1.getValue(), pass2.getValue());
 			});
 		}
 	}
 	
-	private void update(int id, String username, String password) {
+	/**
+	 * Update the user's username and password, if fields are filled correctly
+	 * @param id 
+	 * @param username 
+	 * @param password
+	 * @param password2
+	 */
+	private void update(User user, String username, String oldPassword, String password, String password2) {
 		try {
-			AuthService.getInstance().updateUser(id, username, password);
+			AuthService instance = AuthService.getInstance();
+			//Check fields with AuthService.login
+			if(username != null && password.equals(password2) && instance.login(user.getUsername(), oldPassword).equals(user)) {
+				instance.updateUser(user.getId(), username, password);	
+				Notification.show("Username and/or password updated");
+			} else {
+				Notification.show("Some fields filled incorrectly", Notification.Type.WARNING_MESSAGE);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			Notification.show("Error with connection", Notification.Type.WARNING_MESSAGE);
+		//If AuthService.login returns null:
+		} catch(NullPointerException e) {
+			Notification.show("Wrong password", Notification.Type.WARNING_MESSAGE);
 		}
 	}
 }
