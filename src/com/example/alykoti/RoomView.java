@@ -95,7 +95,7 @@ public class RoomView extends AppView implements View {
 		 
 		room.setId(roomId);
 		try {
-			room.pull();//P‰ivitet‰‰n huone-olion sis‰ltˆ tietokannasta
+			room.pull();//P√§ivitet√§√§n sis√§lt√∂ tietokannasta
 			roomTable.setCaption(room.getName());
 			List<Device> devices = room.getDevices();
 			for(Device d : devices)
