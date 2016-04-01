@@ -2,6 +2,7 @@ package com.example.alykoti.models;
 
 import com.example.alykoti.models.devices.DeviceStatus;
 import com.example.alykoti.models.devices.DeviceType;
+import com.example.alykoti.services.AuthService;
 import com.example.alykoti.services.DatabaseService;
 
 import java.sql.*;
@@ -128,7 +129,72 @@ public class Device implements IResource<Device> {
 
 	@Override
 	public void create() throws SQLException {
+		try(Connection conn = DatabaseService.getInstance().getConnection()){
+			String createDeviceSql = "INSERT INTO devices (room, name, type) VALUES (?,?,?)";
 
+			PreparedStatement createStatement = conn.prepareStatement(createDeviceSql, Statement.RETURN_GENERATED_KEYS);
+			createStatement.setInt(1, room);
+			createStatement.setString(2, name);
+			createStatement.setString(3, type.toString());
+			createStatement.executeUpdate();
+
+			try(ResultSet idRes = createStatement.getGeneratedKeys()) {
+				if (idRes.first()) {
+					this.id = idRes.getInt(1);
+				}
+			}
+
+			//Seuraavat 2 updatea voidaan tehdä samalla transactionilla
+			boolean prevAutoCommitValue = conn.getAutoCommit();
+			conn.setAutoCommit(false);
+
+			try {
+
+				if (id != null && users.size() != 0) {
+					StringJoiner addUsers = new StringJoiner(",");
+					for (Object ignored : users)
+						addUsers.add("(" + id + ", ?)");
+
+					PreparedStatement addUsersStatement =
+							conn.prepareStatement("INSERT INTO device_users (device, user) VALUES " + addUsers.toString() + ";");
+
+					for (int i = 0, n = users.size(); i < n; i++)
+						addUsersStatement.setInt(i + 1, users.get(i).getId());
+
+					addUsersStatement.executeUpdate();
+				}
+
+				if (id != null && statuses.size() != 0) {
+					StringJoiner addStatuses = new StringJoiner(",");
+					Collection<DeviceStatus> statusValues = statuses.values();
+
+					for (Object ignored : statusValues)
+						addStatuses.add("(" + id + ", ?, ?, ?, NOW())");
+
+					PreparedStatement addStatusesStatement = conn.prepareStatement(
+							"INSERT INTO device_status (device, status_type, value_str, value_number, updated) " +
+									"VALUES " + addStatuses.toString() + ";");
+
+					int index = 0;
+					for (DeviceStatus s : statusValues) {
+						addStatusesStatement.setString(++index, s.statusType.toString());
+						addStatusesStatement.setString(++index, s.valueStr);
+						addStatusesStatement.setInt(++index, s.valueInt);
+					}
+					System.out.println("Setting status for :"+id + "\n" + addStatusesStatement.toString());
+					addStatusesStatement.executeUpdate();
+				}
+
+
+				conn.commit();
+				conn.setAutoCommit(prevAutoCommitValue);
+
+			} finally {
+				try {
+					conn.setAutoCommit(prevAutoCommitValue);
+				} catch (Exception ignored){}
+			}
+		}
 	}
 
 	@Override
@@ -177,6 +243,14 @@ public class Device implements IResource<Device> {
 
 	public void setUpdated(java.sql.Date updated) {
 		this.updated = updated;
+	}
+
+	public void setType(DeviceType type){
+		this.type = type;
+	}
+
+	public DeviceType getType(){
+		return type;
 	}
 
 }

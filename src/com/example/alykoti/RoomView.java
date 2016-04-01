@@ -4,6 +4,9 @@ import com.example.alykoti.components.RoomComponent;
 import com.example.alykoti.models.Device;
 import com.example.alykoti.models.Home;
 import com.example.alykoti.models.Room;
+import com.example.alykoti.models.User;
+import com.example.alykoti.models.devices.DeviceStatus;
+import com.example.alykoti.models.devices.DeviceType;
 import com.example.alykoti.services.AuthService;
 import com.example.alykoti.services.AuthService.Role;
 import com.vaadin.client.ui.Icon;
@@ -54,7 +57,20 @@ public class RoomView extends AppView implements View {
 
 		Device dd = new Device();
 		dd.setRoom(3);
+		dd.setName("Jännä huone");
+		dd.setType(DeviceType.DOOR);
+		DeviceStatus.Type t = DeviceStatus.Type.BRIGHTNESS;
+		dd.statuses.put(t, new DeviceStatus(t, 40));
+		DeviceStatus.Type tt = DeviceStatus.Type.TEMPERATURE;
+		dd.statuses.put(tt, new DeviceStatus(tt, 8));
+		User u = new User();
+		u.setId(6);
+		User uu = new User();
+		uu.setId(7);
+		dd.users.add(u);
+		dd.users.add(uu);
 		try {
+			dd.create();
 			System.out.println("Device test " + dd.query());
 		} catch (SQLException e) {
 			e.printStackTrace();
