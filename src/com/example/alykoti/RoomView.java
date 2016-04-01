@@ -56,7 +56,7 @@ public class RoomView extends AppView implements View {
 		super.enter(event);
 
 		Device dd = new Device();
-		dd.setRoom(3);
+		dd.setRoom(8);
 		dd.setName("Jännä huone");
 		dd.setType(DeviceType.DOOR);
 		DeviceStatus.Type t = DeviceStatus.Type.BRIGHTNESS;
@@ -64,14 +64,14 @@ public class RoomView extends AppView implements View {
 		DeviceStatus.Type tt = DeviceStatus.Type.TEMPERATURE;
 		dd.statuses.put(tt, new DeviceStatus(tt, 8));
 		User u = new User();
-		u.setId(6);
+		u.setId(8);
 		User uu = new User();
 		uu.setId(7);
 		dd.users.add(u);
 		dd.users.add(uu);
 		try {
 			dd.create();
-			System.out.println("Device test " + dd.query());
+			System.out.println("Device test " + new Device().query());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

@@ -27,7 +27,7 @@ public class DeviceStatus {
 		String value = valueInt != null ? ""+valueInt
 				: valueStr != null ? ("\"" + valueStr + "\"")
 				: null;
-		return "{ " + statusType.toString() + ": " + value + " }";
+		return "{ " + statusType + ": " + value + " }";
 	}
 
 	public enum Type {
