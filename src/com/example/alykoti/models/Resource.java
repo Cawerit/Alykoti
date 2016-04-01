@@ -24,7 +24,7 @@ import java.util.StringJoiner;
  *  - Joukko luokkamuuttujia joiden näkyvyys on vähintään `protected` ja joissa on annotaatio Resource.Column
  *  - Integer id on kaikille Resource-objekteille pakollinen tieto eikä sitä tule erikseen määrittää annotaatiolla
  */
-public abstract class Resource<T extends Resource> {
+public abstract class Resource<T extends Resource> implements IResource<T> {
 
 	private final String tableName;
 	private Class<T> resourceType;

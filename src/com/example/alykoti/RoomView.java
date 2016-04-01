@@ -51,7 +51,15 @@ public class RoomView extends AppView implements View {
 	@Override
 	public void enter(ViewChangeEvent event) {
 		super.enter(event);
-		
+
+		Device dd = new Device();
+		dd.setRoom(3);
+		try {
+			System.out.println("Device test " + dd.query());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 		if(roomTable.size() > 0) roomTable.removeAllItems();
 		roomTable.addContainerProperty("Item", String.class, null);
 		roomTable.addContainerProperty("Status", String.class, null);
@@ -110,7 +118,7 @@ public class RoomView extends AppView implements View {
 		Object newItem = roomTable.addItem();
 		Item tableRow = roomTable.getItem(newItem);
 		tableRow.getItemProperty("Item").setValue(d.getName());
-		tableRow.getItemProperty("Status").setValue(d.getStatusValueStr());
+		//tableRow.getItemProperty("Status").setValue(d.statuses;
 	}
 
 }
