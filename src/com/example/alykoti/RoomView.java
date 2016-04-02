@@ -1,6 +1,8 @@
 package com.example.alykoti;
 
+import com.example.alykoti.components.DeviceStatusComponent;
 import com.example.alykoti.components.RoomComponent;
+import com.example.alykoti.components.UserListComponent;
 import com.example.alykoti.models.Device;
 import com.example.alykoti.models.Home;
 import com.example.alykoti.models.Room;
@@ -14,14 +16,9 @@ import com.vaadin.data.Item;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Layout;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -32,7 +29,7 @@ public class RoomView extends AppView implements View {
 	public final HorizontalLayout buttons = new HorizontalLayout();
 	public final Button prev = new Button();
 	public final Button next = new Button();
-	public final Table roomTable = new Table();
+	public final Accordion roomAcccordion = new Accordion();
 	private Room room = new Room();
 	private Integer roomId = 0;
 	private Integer homeId = 0;
@@ -41,47 +38,24 @@ public class RoomView extends AppView implements View {
 		super(AuthService.Role.ADMIN);
 		content.setSizeFull();
 		addComponent(content);
-		content.addComponent(roomTable);
+		content.addComponent(roomAcccordion);
 		content.addComponent(buttons);
 		buttons.addComponent(prev);
 		buttons.addComponent(next);
-		content.setComponentAlignment(roomTable, Alignment.MIDDLE_CENTER);
+		content.setComponentAlignment(roomAcccordion, Alignment.MIDDLE_CENTER);
 		content.setComponentAlignment(buttons, Alignment.TOP_CENTER);
 		buttons.setComponentAlignment(prev, Alignment.TOP_CENTER);
 		buttons.setComponentAlignment(next, Alignment.TOP_CENTER);
+		roomAcccordion.setHeightUndefined();
+		roomAcccordion.setWidth("50%");
 	}
 	
 	@Override
 	public void enter(ViewChangeEvent event) {
 		super.enter(event);
+		roomAcccordion.removeAllComponents();
 
-		Device dd = new Device();
-		dd.setRoom(8);
-		dd.setName("Jännä huone");
-		dd.setType(DeviceType.DOOR);
-		DeviceStatus.Type t = DeviceStatus.Type.BRIGHTNESS;
-		dd.statuses.put(t, new DeviceStatus(t, 40));
-		DeviceStatus.Type tt = DeviceStatus.Type.TEMPERATURE;
-		dd.statuses.put(tt, new DeviceStatus(tt, 8));
-		User u = new User();
-		u.setId(8);
-		User uu = new User();
-		uu.setId(7);
-		dd.users.add(u);
-		dd.users.add(uu);
-		try {
-			dd.create();
-			System.out.println("Device test " + new Device().query());
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		if(roomTable.size() > 0) roomTable.removeAllItems();
-		roomTable.addContainerProperty("Item", String.class, null);
-		roomTable.addContainerProperty("Status", String.class, null);
-		roomTable.setPageLength(roomTable.size());
-	
-		prev.setCaption("Previous room");
+		prev.setCaption("Edellinen huone");
 		prev.setSizeUndefined();
 		prev.setIcon(FontAwesome.CHEVRON_CIRCLE_LEFT);
 		if(next.getListeners(ClickEvent.class).size() == 0) {
@@ -94,7 +68,7 @@ public class RoomView extends AppView implements View {
 				}
 			});
 		}
-		next.setCaption("Next room");
+		next.setCaption("Seuraava huone");
 		next.setIcon(FontAwesome.CHEVRON_CIRCLE_RIGHT);
 		if(next.getListeners(ClickEvent.class).size() == 0) {
 			next.addClickListener(new ClickListener() {
@@ -120,21 +94,23 @@ public class RoomView extends AppView implements View {
 		room.setId(roomId);
 		try {
 			room.pull();//Päivitetään sisältö tietokannasta
-			roomTable.setCaption(room.getName());
+			roomAcccordion.setCaption(room.getName());
 			List<Device> devices = room.getDevices();
-			for(Device d : devices)
-				addToTable(d);
+			for(Device d : devices) addToAccordion(d);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
     }
 	
 	
-	private void addToTable (Device d){
-		Object newItem = roomTable.addItem();
-		Item tableRow = roomTable.getItem(newItem);
-		tableRow.getItemProperty("Item").setValue(d.getName());
-		//tableRow.getItemProperty("Status").setValue(d.statuses;
+	private void addToAccordion (Device d){
+		VerticalLayout tabContent = new VerticalLayout();
+		tabContent.setWidth("100%");
+		DeviceStatusComponent statusTable = new DeviceStatusComponent(d.statuses.values());
+		UserListComponent userlist = new UserListComponent(d.users);
+		tabContent.addComponent(statusTable);
+		tabContent.addComponent(userlist);
+		roomAcccordion.addTab(tabContent, d.getName());
 	}
 
 }

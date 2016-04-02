@@ -2,7 +2,6 @@ package com.example.alykoti.models;
 
 import com.example.alykoti.models.devices.DeviceStatus;
 import com.example.alykoti.models.devices.DeviceType;
-import com.example.alykoti.services.AuthService;
 import com.example.alykoti.services.DatabaseService;
 
 import java.sql.*;
@@ -29,26 +28,29 @@ public class Device implements IResource<Device> {
 
 	@Override
 	public List<Device> query() throws SQLException {
-		return DatabaseService.getInstance().useConnection(conn -> {
+		//Rakennetaan query sen mukaan mitä dataa tässä oliossa on
+		StringJoiner sql = new StringJoiner(" AND ");
+		if(name != null) sql.add("name = ?");
+		if(type != null) sql.add("type = ?");
+		if(room != null) sql.add("room = ?");
+		if(updated != null) sql.add("updated > ?");
 
-			//Rakennetaan query sen mukaan mitä dataa tässä oliossa on
-			StringJoiner sql = new StringJoiner(" AND ");
-			if(name != null) sql.add("name = ?");
-			if(type != null) sql.add("type = ?");
-			if(room != null) sql.add("room = ?");
-			if(updated != null) sql.add("updated > ?");
+		StringJoiner userIn = new StringJoiner(",");
+		for(Object o : users) userIn.add("?");
 
-			StringJoiner userIn = new StringJoiner(",");
-			for(Object o : users) userIn.add("?");
+		if(userIn.length() != 0) {
+			sql.add("id IN (SELECT device FROM device_users WHERE user IN (" + userIn.toString() + "))");
+		}
 
-			if(userIn.length() != 0) sql.add("userId IN (" + userIn.toString() + ")");
+		//Nyt StringJoiner sql on esimerkiksi "room = ? AND userId IN (?,?,?)"
+		String query = "SELECT * FROM device_full_info";
+		if(sql.length() != 0) query += " WHERE " + sql.toString();
+		query += ";";
 
-			//Nyt StringJoiner sql on esimerkiksi "room = ? AND userId IN (?,?,?)"
-			String query = "SELECT * FROM device_full_info";
-			if(sql.length() != 0) query += " WHERE " + sql.toString();
-			query += ";";
-			PreparedStatement statement = conn.prepareStatement(query);
-
+		try(
+			Connection conn = DatabaseService.getInstance().getConnection();
+			PreparedStatement statement = conn.prepareStatement(query)
+		){
 			int index = 0;
 			//Täytetään arvot (HUOM! Tässä on ylläpidettävä sama järjestys kuin yllä)
 			if(name != null) statement.setString(++index, name);
@@ -60,15 +62,17 @@ public class Device implements IResource<Device> {
 			System.out.println("Running query " + statement.toString());
 
 			return fromResultSet(statement.executeQuery());
-		});
+		}
 	}
 
 	@Override
 	public void pull() throws SQLException {
-		DatabaseService.getInstance().useConnection(conn -> {
-			PreparedStatement statement = conn.prepareStatement(
+		try(
+				Connection conn = DatabaseService.getInstance().getConnection();
+				PreparedStatement statement = conn.prepareStatement(
 					"SELECT * FROM device_full_info WHERE id = ? ORDER BY id, statusType, userId"
-			);
+				)
+		){
 			statement.setInt(1, getId());
 			List<Device> result = fromResultSet(statement.executeQuery());
 			if(result.size() == 1){
@@ -81,21 +85,19 @@ public class Device implements IResource<Device> {
 				room = d.room;
 				updated = d.updated;
 			}
-			return null;
-		});
+		}
 	}
 
 	private static List<Device> fromResultSet(ResultSet res) throws SQLException {
 		List<Device> devices = new ArrayList<>();
 		Integer currentId = null;
 		Device d = null;
-
 		List<Integer> userIds = new ArrayList<>();//Lista josta on nopea tarkistaa onko käyttäjä lisätty jo käyttäjälistaan
-
 		while(res.next()){
 			Integer nextId = res.getInt("id");
 			if(currentId == null || !currentId.equals(nextId)){//Nämä tiedot eivät ole listoja, eli ei tarvitse käsitellä joka riville uudestaan
 				d = new Device(nextId);
+				userIds.clear();
 				devices.add(d);
 				currentId = nextId;
 				d.name = res.getString("name");
@@ -104,7 +106,7 @@ public class Device implements IResource<Device> {
 				d.type = DeviceType.fromString(res.getString("type"));
 			}
 			Integer userId = res.getInt("userId");
-			if(!userIds.contains(userId)){
+			if(!userId.equals(0) && !userIds.contains(userId)){
 				userIds.add(userId);
 				User u = new User();
 				u.setId(userId);
@@ -112,7 +114,7 @@ public class Device implements IResource<Device> {
 				d.users.add(u);
 			}
 			DeviceStatus.Type statusType = DeviceStatus.Type.fromString(res.getString("statusType"));
-			if(!d.statuses.containsKey(statusType)){
+			if(statusType != null && !d.statuses.containsKey(statusType)){
 				String valueStr = res.getString("statusValueStr");
 				Integer valueNumber = res.getInt("statusValueNumber");
 				DeviceStatus status;
@@ -179,7 +181,7 @@ public class Device implements IResource<Device> {
 					for (DeviceStatus s : statusValues) {
 						addStatusesStatement.setString(++index, s.statusType.toString());
 						addStatusesStatement.setString(++index, s.valueStr);
-						addStatusesStatement.setInt(++index, s.valueInt);
+						addStatusesStatement.setInt(++index, s.valueNumber);
 					}
 					System.out.println("Setting status for :"+id + "\n" + addStatusesStatement.toString());
 					addStatusesStatement.executeUpdate();
@@ -197,9 +199,26 @@ public class Device implements IResource<Device> {
 		}
 	}
 
-	@Override
-	public void update() throws SQLException {
-
+	public void setStatus(DeviceStatus stat) throws SQLException {
+		statuses.put(stat.statusType, stat);
+		final String sql = "INSERT INTO device_status (device, status_type, value_str, value_number, updated) " +
+				"VALUES(?, ?, ?, ?, NOW()) " +
+				"ON DUPLICATE KEY UPDATE " +
+				"value_str = ?," +
+				"value_number = ?," +
+				"updated = NOW();";
+		try(
+				Connection conn = DatabaseService.getInstance().getConnection();
+				PreparedStatement statement = conn.prepareStatement(sql)
+		){
+			statement.setInt(1, getId());
+			statement.setString(2, stat.statusType.toString());
+			statement.setString(3, stat.valueStr);
+			statement.setInt(4, stat.valueNumber);
+			statement.setString(5, stat.valueStr);
+			statement.setInt(6, stat.valueNumber);
+			statement.executeUpdate();
+		}
 	}
 
 	@Override

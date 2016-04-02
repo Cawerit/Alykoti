@@ -7,5 +7,4 @@ public interface IResource<T extends IResource> {
 	List<T> query() throws SQLException;
 	void pull() throws SQLException;
 	void create() throws SQLException;
-	void update() throws SQLException;
 }

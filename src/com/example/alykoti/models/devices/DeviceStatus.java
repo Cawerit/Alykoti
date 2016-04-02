@@ -7,24 +7,24 @@ package com.example.alykoti.models.devices;
 public class DeviceStatus {
 
 	public final String valueStr;
-	public final Integer valueInt;
+	public final Integer valueNumber;
 	public final Type statusType;
 
 	public DeviceStatus(Type statusType, String value){
 		this.statusType = statusType;
-		this.valueInt = null;
+		this.valueNumber = null;
 		this.valueStr = value;
 	}
 
 	public DeviceStatus(Type statusType, Integer value){
 		this.statusType = statusType;
-		valueInt = value;
+		valueNumber = value;
 		valueStr = null;
 	}
 
 	@Override
 	public String toString(){
-		String value = valueInt != null ? ""+valueInt
+		String value = valueNumber != null ? ""+ valueNumber
 				: valueStr != null ? ("\"" + valueStr + "\"")
 				: null;
 		return "{ " + statusType + ": " + value + " }";

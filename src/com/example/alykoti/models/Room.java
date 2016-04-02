@@ -29,8 +29,7 @@ public class Room extends Resource<Room> {
 		like.setRoom(getId());
 		List<Device> res = like.query();
 		like.setRoom(prev);
-		return new ArrayList<>();
-		//return res;
+		return res;
 	}
 
 	public Room(String name) { this(name, null); }
