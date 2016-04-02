@@ -1,11 +1,7 @@
 package com.example.alykoti.models;
 
 import com.example.alykoti.services.DatabaseService;
-import com.mysql.fabric.xmlrpc.base.Data;
-import com.sun.corba.se.spi.orbutil.fsm.Guard;
-
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Home extends Resource<Home> {
@@ -41,6 +37,21 @@ public class Home extends Resource<Home> {
 		Room roomQuery = new Room();
 		roomQuery.setHomeId(getId());
 		return roomQuery.query();
+	}
+
+	public Integer getFirstRoomId() throws SQLException {
+		final String sql = "SELECT id FROM rooms WHERE home = ? ORDER BY id ASC LIMIT 1;";
+		try(
+				Connection conn = DatabaseService.getInstance().getConnection();
+				PreparedStatement statement = conn.prepareStatement(sql);
+		){
+			statement.setInt(1, getId());
+			ResultSet res = statement.executeQuery();
+			if(res.first()){
+				return res.getInt("id");
+			}
+		}
+		return null;
 	}
 
 }

@@ -46,19 +46,19 @@ public class HomeView extends AppView {
     public void enter(ViewChangeListener.ViewChangeEvent event){
         super.enter(event);
 		Integer homeId = Integer.parseInt(event.getParameters());//Kodin id saadaan url parametreista
-		//Tyhj‰t‰‰n vanha sis‰ltˆ
+		//Tyhj√§t√§√§n vanha sis√§lt√∂
 		accordion.removeAllComponents();
-		//Luodaan ylin palkki, joka sis‰lt‰‰ napin huoneen lis‰‰miseen
+		//Luodaan ylin palkki, joka sis√§lt√§√§ napin huoneen lis√§√§miseen
 		Room newRoom = new Room();
 		newRoom.setHomeId(homeId);
 		TabSheet.Tab addRoomComponent = accordion.addTab(new RoomComponent(newRoom, (Room room) -> {
 			//Callback lis√§√§ uuden huoneen listaan
 			TabSheet.Tab newTab = accordion.addTab(new RoomComponent(room), room.getName());
-		}), "Lis‰‰ huone", FontAwesome.PLUS);
+		}), "Lis√§√§ huone", FontAwesome.PLUS);
 		
         Home home = new Home(homeId);
 		try {
-			home.pull();//P‰ivitet‰‰n koti-olion sis‰ltˆ tietokannasta
+			home.pull();//P√§ivitet√§√§n olion sis√§lt√∂ tietokannasta
 			homePanel.setCaption(home.getName());
 			List<Room> rooms = home.getRooms();
 			for(Room r : rooms)
@@ -67,19 +67,20 @@ public class HomeView extends AppView {
 			e.printStackTrace();
 		}
 	
-		//Nappi, jolla siirryt‰‰n huonen‰kym‰‰n
+		//Nappi, jolla siirryt√§√§n huonen√§kym√§√§n
 		roomButton.setCaption("Open Room View");
 		roomButton.setIcon(FontAwesome.EYE);
 		roomButton.addClickListener(new ClickListener(){
 			@Override
 			public void buttonClick(ClickEvent event) {
-				//Menn‰‰n nyt uri-fragmentilla kodin ensimm‰iseen huoneeseen
-				int firstRoomId = 0;
+				//Menn√§√§n nyt uri-fragmentilla kodin ensimm√§iseen huoneeseen
+				Integer firstRoomId = null;
 				try {
-					firstRoomId = home.getRooms().get(0).getId();
+					firstRoomId = home.getFirstRoomId();
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
+				if(firstRoomId == null) return;
 				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + firstRoomId);
 			}
 		});
