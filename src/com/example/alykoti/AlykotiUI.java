@@ -46,8 +46,7 @@ public class AlykotiUI extends UI {
 
 		setPollInterval(1000);
 		
-		//setContent(new LoginView());
-		NAVIGATOR.navigateTo("");
+		setContent(new LoginView());
 		
 		}
 }

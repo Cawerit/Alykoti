@@ -1,5 +1,6 @@
 package com.example.alykoti;
 
+import com.example.alykoti.commands.SaveDeviceCommand;
 import com.example.alykoti.components.DeviceStatusComponent;
 import com.example.alykoti.components.RoomComponent;
 import com.example.alykoti.components.UserListComponent;
@@ -47,7 +48,6 @@ public class RoomView extends AppView implements View {
 		content.setComponentAlignment(buttons, Alignment.TOP_CENTER);
 		roomAcccordion.setHeightUndefined();
 		roomAcccordion.setWidth("50%");
-
 	}
 	
 	@Override
@@ -63,6 +63,10 @@ public class RoomView extends AppView implements View {
 		try {
 			//Kodin ja huoneen id saadaan viimeisistä kahdesta url parametrista
 			String[] params = event.getParameters().split("/");
+			if(params.length < 2) {//fail, invalid url :(
+				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMIN_DASHBOARD_VIEW);
+				return;
+			}
 			Integer homeId = Integer.parseInt(params[params.length-2]);
 			Integer roomId = Integer.parseInt(params[params.length-1]);
 			room.setId(roomId);
@@ -114,6 +118,11 @@ public class RoomView extends AppView implements View {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+
+			Button addDevice = new Button("Lisää laite", FontAwesome.PLUS);
+			addDevice.addClickListener(new SaveDeviceCommand(roomId, this::addToAccordion));
+			buttons.addComponent(addDevice);
+
 		} catch(Exception e){
 			e.printStackTrace();
 		}
@@ -127,7 +136,7 @@ public class RoomView extends AppView implements View {
 		UserListComponent userlist = new UserListComponent(d.users);
 		tabContent.addComponent(statusTable);
 		tabContent.addComponent(userlist);
-		roomAcccordion.addTab(tabContent, d.getName());
+		roomAcccordion.addTab(tabContent, d.getName() + " (" + d.getType().toString("fi") + ")");
 	}
 
 }
