@@ -36,7 +36,7 @@ public class AlykotiUI extends UI {
 		
 		NAVIGATOR = new Navigator(this, this);
 		NAVIGATOR.addView("", new LoginView());
-		NAVIGATOR.addView(ADMINTOP, new AdminTopView());
+		//NAVIGATOR.addView(ADMINTOP, new AdminTopView());
 		NAVIGATOR.addView(USERVIEW, new UserView());
 		NAVIGATOR.addView(ROOMVIEW, new RoomView());
 		NAVIGATOR.addView(HOME_VIEW, new HomeView());
@@ -46,8 +46,8 @@ public class AlykotiUI extends UI {
 
 		setPollInterval(1000);
 		
-		setContent(new LoginView());
-
+		//setContent(new LoginView());
+		NAVIGATOR.navigateTo("");
 		
 		}
 }

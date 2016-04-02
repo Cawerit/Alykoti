@@ -17,7 +17,7 @@ public class UserListComponent extends VerticalLayout {
 	public UserListComponent(List<User> users){
 		this.users = users;
 		Label header = new Label("Käyttäjät jotka näkevät tämän laitteen tilan");
-		header.setStyleName("h1");
+		header.setStyleName("h6");
 		addComponent(header);
 		List<String> asString = users.stream().map(User::getUsername).collect(Collectors.toList());
 		addComponent(new Label(String.join(", ", asString)));
