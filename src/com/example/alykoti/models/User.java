@@ -2,10 +2,9 @@ package com.example.alykoti.models;
 
 import com.example.alykoti.services.AuthService;
 import com.example.alykoti.services.DatabaseService;
+import com.mysql.fabric.xmlrpc.base.Data;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +12,7 @@ public class User extends Resource<User> {
 
 	@Column String username;
     @Column String role;//Resource.Column annotaatio vaatii tämän olevan string
+	@Column(sqlType = Types.TINYINT) int online;
     private Integer id;
 	private AuthService.Role _role;//Säilötään tähän varsinainen Role-enum kun se saadaan
 
@@ -93,5 +93,41 @@ public class User extends Resource<User> {
 	public String toString(){
 		return this.getUsername();
 	}
+
+
+	public boolean isOnline(){
+		return this.online == 1;
+	}
+
+	/**
+	 * Asettaa käyttäjän online-statuksen ja tallentaa sen tietokantaan
+	 * @param value Onko käyttäjä online?
+	 * @throws SQLException
+	 */
+	public void setOnline(boolean value) throws SQLException {
+		setOnline(value ? 1 : 0);//MySql ei tue boolean-arvoja, muunnetaan intiksi
+		if(getId() != null) {
+			try (
+					Connection conn = DatabaseService.getInstance().getConnection();
+					PreparedStatement statement = conn.prepareStatement(SET_ONLINE_SQL);
+			) {
+				statement.setInt(1, online);
+				statement.setInt(2, getId());
+			}
+		}
+	}
+
+	/**
+	 * Asettaa käyttäjän online-statuksen, mutta EI tallenna sitä tietokantaan.
+	 * Tätä metodia kutsutaan lähinnä kun käyttäjän online-tila on juuri HAETTU tietokannasta
+	 * eikä sitä siksi ole järkevä tallentaa sinne uudestaan.
+	 * @param value
+	 */
+	protected void setOnline(int value){
+		online = value;
+	}
+
+	private static final String SET_ONLINE_SQL =
+			"UPDATE users SET online = ? WHERE id = ?";
 
 }

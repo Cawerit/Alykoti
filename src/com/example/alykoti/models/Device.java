@@ -7,6 +7,12 @@ import com.example.alykoti.services.DatabaseService;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * Sisältää tiedot laitteista. Toisin kuin muut tietokannasta datansa saavat luokat,
+ * tämä käyttää monta taulua yhdistävää näkymää lähteenään eikä siksi voi käyttää
+ * suoraan Resource-luokkaa pohjana vaan vaatii hieman lisätyötä käsitelläkseen dataa
+ * eri lähteistä.
+ */
 public class Device implements IResource<Device> {
 
 	private Integer id;
@@ -88,7 +94,15 @@ public class Device implements IResource<Device> {
 		}
 	}
 
+	/**
+	 * Muodostaa listan device-olioita tietokannasta hetun ResultSetin pohjalta.
+	 * @param res
+	 * @return
+	 * @throws SQLException
+	 */
 	private static List<Device> fromResultSet(ResultSet res) throws SQLException {
+		//Titokannassa laitteet ovat näkymässä, jossa on laitteet, niiden käyttäjät ja niiden tila
+		//on yhdistetty joinilla. Rivien yhdistäminen järkevästi vaatii hieman lisäkikkailua.
 		List<Device> devices = new ArrayList<>();
 		Integer currentId = null;
 		Device d = null;
@@ -111,6 +125,7 @@ public class Device implements IResource<Device> {
 				User u = new User();
 				u.setId(userId);
 				u.setUsername(res.getString("userName"));
+				u.setOnline(res.getInt("userOnline"));
 				d.users.add(u);
 			}
 			DeviceStatus.Type statusType = DeviceStatus.Type.fromString(res.getString("statusType"));
@@ -199,6 +214,11 @@ public class Device implements IResource<Device> {
 		}
 	}
 
+	/**
+	 * Vaihtaa laitteen tilaa
+	 * @param stat
+	 * @throws SQLException
+	 */
 	public void setStatus(DeviceStatus stat) throws SQLException {
 		statuses.put(stat.statusType, stat);
 		final String sql = "INSERT INTO device_status (device, status_type, value_str, value_number, updated) " +
@@ -221,11 +241,21 @@ public class Device implements IResource<Device> {
 		}
 	}
 
+	/**
+	 * Antaa käyttäjälle oikeuden hallita laitteen tilaa
+	 * @param user
+	 * @throws SQLException
+	 */
 	public void addUser(User user) throws SQLException {
 		users.add(user);
 		executeUserUpdate("INSERT INTO device_users (device, user) VALUES(?, ?);", user);
 	}
 
+	/**
+	 * Poistaa annetulta käyttäjältä oikeuden hallita laitteen tilaa
+	 * @param user
+	 * @throws SQLException
+	 */
 	public void removeUser(User user) throws SQLException {
 		executeUserUpdate("DELETE FROM device_users WHERE device = ? AND user = ?", user);
 	}

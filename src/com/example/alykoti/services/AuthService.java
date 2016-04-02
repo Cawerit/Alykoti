@@ -12,11 +12,11 @@ public class AuthService {
     public User signup(String username, String password, Role role) throws SQLException {
         String salt = genSalt();
         Integer id = null;
-        Connection conn = databaseService
-                .getConnection();
-        try {
+        try (
+			Connection conn = databaseService.getConnection();
             PreparedStatement statement = conn
-                    .prepareStatement(SIGNUP_STATEMENT, Statement.RETURN_GENERATED_KEYS);
+                    .prepareStatement(SIGNUP_STATEMENT, Statement.RETURN_GENERATED_KEYS)
+		){
             statement.setString(1, username);
             statement.setString(2, password + salt);
             statement.setString(3, role.toString());
@@ -27,12 +27,20 @@ public class AuthService {
             if(result.first()){
                 id = result.getInt(1);
             }
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException ignored){}
         }
-        return new User(username, role, id);
+        User u = new User(username, role, id);
+		new Thread(() -> {
+			//Asetetaan käyttäjä online (tämä voidaan hoitaa toisessa säikeessä ja siten
+			//antaa käyttäjän jatkaa sisäänkirjautumista vaikka häntä ei vielä olekaan merkattu online.
+			//Online-tietoa käytetään lähinnä muiden käyttäjien informoimiseen asiasta (ei niin tärkeää)
+			try {
+				u.setOnline(true);
+			} catch (Exception e){
+				System.out.println("Couldn't set user " + u.getId() + " online");
+				e.printStackTrace();
+			}
+		}).start();
+		return u;
     }
 
     public User login(String username, String password) throws SQLException {
@@ -76,9 +84,9 @@ public class AuthService {
         	} catch(SQLException ignored) {	}
         }
     }
-    
-    //TODO: logout logic
+
     public void logout(){
+		AlykotiUI.getCurrent().close();
     }
 
     private static final String SIGNUP_STATEMENT =
