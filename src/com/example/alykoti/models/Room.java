@@ -100,7 +100,6 @@ public class Room extends Resource<Room> {
 				if(val < getId()) result.prev = val;
 				else result.next = val;
 			}
-			System.out.println("Looking for adjacent ids \n" + statement.toString() + "\n" + result);
 			return result;
 		}
 	}

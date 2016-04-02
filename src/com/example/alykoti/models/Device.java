@@ -65,8 +65,6 @@ public class Device implements IResource<Device> {
 			if(updated != null) statement.setDate(++index, updated);
 			for(User u : users) statement.setInt(++index, u.getId());
 
-			System.out.println("Running query " + statement.toString());
-
 			return fromResultSet(statement.executeQuery());
 		}
 	}
@@ -125,7 +123,7 @@ public class Device implements IResource<Device> {
 				User u = new User();
 				u.setId(userId);
 				u.setUsername(res.getString("userName"));
-				u.setOnline(res.getInt("userOnline"));
+				u.setOnline(res.getBoolean("userOnline"));
 				d.users.add(u);
 			}
 			DeviceStatus.Type statusType = DeviceStatus.Type.fromString(res.getString("statusType"));

@@ -32,24 +32,23 @@ public class AlykotiUI extends UI {
 			ADMIN_DASHBOARD_VIEW = "admin-dashboard";
 	
 	@WebServlet(value = "/*", asyncSupported = true)
-	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class)
+	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class, closeIdleSessions=true)
 	public static class Servlet extends VaadinServlet implements SessionDestroyListener {
 
 		@Override
 		public void sessionDestroy(SessionDestroyEvent event) {
+			System.out.println("Session destroy");
 			//Käyttäjän kirjautuessa ulos, merkataan tämä myös tietokantaan
 			//jotta muut käyttäjät näkevät
 			User u = AuthService.getInstance().getCurrentUser();
 			if(u != null){
 				System.out.println("Kirjataan käyttäjä " + u.getUsername() + " ulos");
 				//Tehtävä voidaan hoitaa toisessa säikeessä koska se ei ole niin kiireellinen
-				new Thread(() -> {
-					try {
-						u.setOnline(false);
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}).start();
+				try {
+					u.isOnline(false);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		

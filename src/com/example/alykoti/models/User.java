@@ -12,7 +12,7 @@ public class User extends Resource<User> {
 
 	@Column String username;
     @Column String role;//Resource.Column annotaatio vaatii tämän olevan string
-	@Column(sqlType = Types.TINYINT) int online;
+	@Resource.Column(sqlType = Types.BOOLEAN) Boolean online;
     private Integer id;
 	private AuthService.Role _role;//Säilötään tähän varsinainen Role-enum kun se saadaan
 
@@ -77,9 +77,9 @@ public class User extends Resource<User> {
      */
     public static User fromResultSet(ResultSet result) throws SQLException {
         return new User(
-                result.getString("username"),
-                AuthService.Role.fromString(result.getString("role")),
-                result.getInt("id")
+			result.getString("username"),
+			AuthService.Role.fromString(result.getString("role")),
+			result.getInt("id")
         );
     }
 
@@ -94,25 +94,25 @@ public class User extends Resource<User> {
 		return this.getUsername();
 	}
 
-
 	public boolean isOnline(){
-		return this.online == 1;
+		return online;
 	}
 
 	/**
-	 * Asettaa käyttäjän online-statuksen ja tallentaa sen tietokantaan
+	 * Asettaa käyttäjän online-statuksen ja tallentaa muutoksen tietokantaan
 	 * @param value Onko käyttäjä online?
 	 * @throws SQLException
 	 */
-	public void setOnline(boolean value) throws SQLException {
-		setOnline(value ? 1 : 0);//MySql ei tue boolean-arvoja, muunnetaan intiksi
+	public void isOnline(boolean value) throws SQLException {
+		online = value;
 		if(getId() != null) {
 			try (
 					Connection conn = DatabaseService.getInstance().getConnection();
 					PreparedStatement statement = conn.prepareStatement(SET_ONLINE_SQL);
 			) {
-				statement.setInt(1, online);
+				statement.setBoolean(1, online);
 				statement.setInt(2, getId());
+				statement.executeUpdate();
 			}
 		}
 	}
@@ -123,7 +123,7 @@ public class User extends Resource<User> {
 	 * eikä sitä siksi ole järkevä tallentaa sinne uudestaan.
 	 * @param value
 	 */
-	protected void setOnline(int value){
+	protected void setOnline(boolean value){
 		online = value;
 	}
 

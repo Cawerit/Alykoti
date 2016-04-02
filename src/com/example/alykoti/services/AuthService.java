@@ -28,42 +28,36 @@ public class AuthService {
                 id = result.getInt(1);
             }
         }
-        User u = new User(username, role, id);
-		new Thread(() -> {
-			//Asetetaan käyttäjä online (tämä voidaan hoitaa toisessa säikeessä ja siten
-			//antaa käyttäjän jatkaa sisäänkirjautumista vaikka häntä ei vielä olekaan merkattu online.
-			//Online-tietoa käytetään lähinnä muiden käyttäjien informoimiseen asiasta (ei niin tärkeää)
-			try {
-				u.setOnline(true);
-			} catch (Exception e){
-				System.out.println("Couldn't set user " + u.getId() + " online");
-				e.printStackTrace();
-			}
-		}).start();
-		return u;
+        return new User(username, role, id);
     }
 
     public User login(String username, String password) throws SQLException {
-        Connection conn = databaseService
-                .getConnection();
-        try {
-            PreparedStatement statement = conn
-                    .prepareStatement(LOGIN_STATEMENT);
+        try(
+				Connection conn = databaseService.getConnection();
+            	PreparedStatement statement = conn.prepareStatement(LOGIN_STATEMENT)
+		){
             statement.setString(1, username);
             statement.setString(2, password);
             ResultSet result = statement.executeQuery();
             if (result.first()) {
                 User user = User.fromResultSet(result);
                 setCurrentUser(user);
+                new Thread(() -> {
+                    //Asetetaan käyttäjä online (tämä voidaan hoitaa toisessa säikeessä ja siten
+                    //antaa käyttäjän jatkaa sisäänkirjautumista vaikka häntä ei vielä olekaan merkattu online.
+                    //Online-tietoa käytetään lähinnä muiden käyttäjien informoimiseen asiasta (ei niin tärkeää)
+                    try {
+						user.isOnline(true);
+                    } catch (Exception e){
+                        System.out.println("Couldn't set user " + user.getId() + " online");
+                        e.printStackTrace();
+                    }
+                }).start();
                 return user;
             } else {
                 System.out.println("No user was found");
                 return null;//No users with that name & password
             }
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException ignored){}
         }
     }
     
@@ -86,8 +80,18 @@ public class AuthService {
     }
 
     public void logout(){
-		AlykotiUI.getCurrent().close();
-    }
+		AuthService auth = AuthService.getInstance();
+		User current = auth.getCurrentUser();
+		if(current != null){
+			try {
+				//Päivitetään tieto ettei käyttäjä ole enää online
+				current.isOnline(false);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		AlykotiUI.getCurrent();
+	}
 
     private static final String SIGNUP_STATEMENT =
             "INSERT INTO users (username, password, role, salt) SELECT ?, SHA2(?, 224), ?, ?";

@@ -326,7 +326,7 @@ public abstract class Resource<T extends Resource> implements IResource<T> {
 	}
 
 	private void logQuery(PreparedStatement statement){
-		System.out.println("Ran query:\n" + statement.toString());
+		//System.out.println("Ran query:\n" + statement.toString());
 	}
 
 	private boolean synced = false;

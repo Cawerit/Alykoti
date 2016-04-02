@@ -16,6 +16,7 @@ public class DeviceStatusComponent extends Table {
 	private Collection<DeviceStatus> statuses;
 
 	public DeviceStatusComponent(Collection<DeviceStatus> statuses) {
+		super();
 		this.statuses = statuses;
 		update();
 		setWidth("100%");
