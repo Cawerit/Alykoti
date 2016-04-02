@@ -89,4 +89,9 @@ public class User extends Resource<User> {
         return (o != null && o instanceof User && id != null) && id.equals(((User) o).getId());
     }
 
+	@Override
+	public String toString(){
+		return this.getUsername();
+	}
+
 }

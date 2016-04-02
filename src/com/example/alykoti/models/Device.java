@@ -221,6 +221,26 @@ public class Device implements IResource<Device> {
 		}
 	}
 
+	public void addUser(User user) throws SQLException {
+		users.add(user);
+		executeUserUpdate("INSERT INTO device_users (device, user) VALUES(?, ?);", user);
+	}
+
+	public void removeUser(User user) throws SQLException {
+		executeUserUpdate("DELETE FROM device_users WHERE device = ? AND user = ?", user);
+	}
+
+	private void executeUserUpdate(String sql, User user) throws SQLException {
+		try(
+			Connection conn = DatabaseService.getInstance().getConnection();
+			PreparedStatement statement = conn.prepareStatement(sql)
+		){
+			statement.setInt(1, getId());
+			statement.setInt(2, user.getId());
+			statement.executeUpdate();
+		}
+	}
+
 	@Override
 	public String toString(){
 		return "Device { id: " + this.id +

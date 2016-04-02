@@ -133,7 +133,7 @@ public class RoomView extends AppView implements View {
 		VerticalLayout tabContent = new VerticalLayout();
 		tabContent.setWidth("100%");
 		DeviceStatusComponent statusTable = new DeviceStatusComponent(d.statuses.values());
-		UserListComponent userlist = new UserListComponent(d.users);
+		UserListComponent userlist = new UserListComponent(d);
 		tabContent.addComponent(statusTable);
 		tabContent.addComponent(userlist);
 		roomAcccordion.addTab(tabContent, d.getName() + " (" + d.getType().toString("fi") + ")");
