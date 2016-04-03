@@ -48,30 +48,25 @@ public abstract class SensorComponent extends VerticalLayout {
 
 	/**
 	 * Tämän metodin ylikirjoittamalla voidaan komponentin tilaa päivittää kun sen data muuttuu.
-	 * @param newStatus Uusi laitteen tila
 	 */
 	protected abstract void onNext(DeviceStatus newStatus);
+
+	protected void onNext(){
+		try {
+			getDataSource().pull();
+			DeviceStatus newSatus = getDataSource().statuses.get(getStatus().statusType);
+			onNext(newSatus);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Tämä pitää ylikirjoittaa sen mukaan minkä tyyppistä dataa kyseisen sensorin komponentti lähettää.
 	 * Esim checkbox pitää sisällään boolean dataa, joten checkbox-komponentin on itse hoidettava muunnos
 	 * boolean -> DeviceStatus
 	 */
-	protected abstract DeviceStatus valueToStatus(Object newValue);
-
-	private void onNext(IUpdatable o){
-		if(o != null && o instanceof Device){
-			Device changedDevice = (Device) o;
-			try {
-				changedDevice.pull();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			DeviceStatus newStatus = changedDevice.statuses.get(getStatus().statusType);
-			this.status = newStatus;
-			onNext(newStatus);
-		}
-	}
+	protected abstract DeviceStatus valueToStatus(Object value);
 
 	public Device getDataSource(){
 		return dataSource;

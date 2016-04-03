@@ -16,28 +16,34 @@ public class ObserverService {
 	 */
 	private static final int MAX_QUEUE_LENGTH = 50;
 
-	private final List<IUpdatable> changedData = new ArrayList<>();
+	private final List<WrappedObservable> changedData = new ArrayList<>();
+	private int findByKey(String key){
+		int i = changedData.size();
+		while(--i >= 0) {
+			WrappedObservable change = changedData.get(i);
+			if(change.key.equals(key)) return i;
+		}
+		return -1;
+	}
 
 	/**
 	 * Tarkistaa onko resurssiin tullut muutoksia annetun ajan jälkeen
 	 */
-	private boolean hasChanges(IUpdatable o){
+	private boolean hasChanges(WrappedObserver observer){
 		synchronized (changedData) {
 			//Käydään lista läpi lopusta alkuun, koska muutokset laitetaan aina listan loppuun
 			//(sieltä ne löytyvät luultavasti nopeammin)
-			int i = changedData.size();
-			while(--i >= 0) {
-				IUpdatable change = changedData.get(i);
-				if (change.equals(o)) {
-					//System.out.println("Tutkitaan objektia " + o + " " + change.updatedAfter(after));
-					boolean result = change.updatedAfter(o);
-					if(result){
-						System.out.println("Has changes! " + change + " " + o);
-					}
-					return result;
-				}
+			int i = findByKey(observer.key);
+			if(i == -1) {
+				return false;
 			}
-			return false;
+			WrappedObservable change = changedData.get(i);
+				//System.out.println("Tutkitaan objektia " + o + " " + change.updatedAfter(after));
+			boolean result = change.updated > observer.updated;
+			if(result){
+				System.out.println("Has changes! " + change + " " + observer);
+			}
+			return result;
 		}
 	}
 
@@ -47,11 +53,11 @@ public class ObserverService {
 	 */
 	public void update(IUpdatable o){
 		synchronized (changedData) {
-			int index = changedData.indexOf(o);
+			int index = findByKey(o.getUniqueKey());
 			if(index != -1){
-				changedData.set(index, o);
+				changedData.get(index).updated = o.getUpdated();
 			} else {
-				changedData.add(o);
+				changedData.add(new WrappedObservable(o.getUniqueKey(), o.getUpdated()));
 				if (changedData.size() > MAX_QUEUE_LENGTH) {
 					changedData.remove(0);
 				}
@@ -75,7 +81,7 @@ public class ObserverService {
 
 	@FunctionalInterface
 	public interface IObserver {
-		void onNext(IUpdatable oldData);
+		void onNext();
 	}
 
 	/**
@@ -88,7 +94,7 @@ public class ObserverService {
 
 		public void update(){
 			for(WrappedObserver o : observers){
-				if(hasChanges(o.listens)){
+				if(hasChanges(o)){
 					o.onNext();
 				}
 			}
@@ -101,16 +107,48 @@ public class ObserverService {
 
 	private static class WrappedObserver {
 
-		private final IObserver wrapped;
-		private final IUpdatable listens;
+		public final IObserver wrapped;
+		public final String key;
+		protected long updated;
 
 		public WrappedObserver(IUpdatable listen, IObserver observer){
-			listens = listen;
+			key = listen.getUniqueKey();
 			wrapped = observer;
 		}
 
 		private void onNext(){
-			wrapped.onNext(listens);
+			updated = new Date().getTime();
+			wrapped.onNext();
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			WrappedObserver that = (WrappedObserver) o;
+			return equals(that);
+		}
+		public boolean equals(WrappedObserver o){
+			return wrapped.equals(o.wrapped) && key.equals(o.key);
+		}
+
+		@Override
+		public int hashCode() {
+			int result = wrapped.hashCode();
+			result = 31 * result + key.hashCode();
+			return result;
 		}
 	}
+
+	private class WrappedObservable {
+		public final String key;
+		protected long updated;
+
+		public WrappedObservable(String key, long updated) {
+			this.key = key;
+			this.updated = updated;
+		}
+	}
+
 }

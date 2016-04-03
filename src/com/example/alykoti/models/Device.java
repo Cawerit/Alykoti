@@ -228,6 +228,7 @@ public class Device implements IResource<Device>, IUpdatable {
 				", name: " + this.name +
 				", status: " + Arrays.toString(this.statuses.values().toArray()) +
 				", users: " + users.toString() +
+				", updated: " + getUpdated() +
 				" }";
 	}
 
@@ -237,21 +238,6 @@ public class Device implements IResource<Device>, IUpdatable {
 		if(o != null && o instanceof Device){
 			Integer oId = ((Device) o).getId();
 			return oId == null ? getId() == null : oId.equals(getId());
-		}
-		return false;
-	}
-
-
-	@Override
-	public boolean updatedAfter(IUpdatable after){
-		return after != null && updatedAfter(after.getUpdated());
-	}
-
-	public boolean updatedAfter(long after){
-		for(DeviceStatus stat : statuses.values()){
-			if(stat.updated > after){
-				return true;
-			}
 		}
 		return false;
 	}
@@ -283,6 +269,11 @@ public class Device implements IResource<Device>, IUpdatable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public String getUniqueKey() {
+		return "device__" + getId();
 	}
 
 	public long getUpdated() {
