@@ -57,9 +57,9 @@ public class AlykotiUI extends UI {
 		navigator.setErrorView(new ErrorView());
 
 		//Hoidetaan muutosten observointi
-		setPollInterval(3000);
+		setPollInterval(1500);
 		navigator.addViewChangeListener(new UpdateObservers());
-		addPollListener(pollEvent -> {
+		addPollListener(ignored -> {
 			if(observers != null){
 				observers.update();
 			}
