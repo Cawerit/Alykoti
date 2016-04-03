@@ -30,7 +30,7 @@ public class LoginView extends VerticalLayout implements View {
 			public void buttonClick(ClickEvent event) {
                 User user = null;
                 try {
-                    user = AuthService.getInstance().login(username.getValue(), password.getValue());
+                    user = AuthService.getInstance().login(username.getValue(), password.getValue(), LoginView.this.getUI());
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

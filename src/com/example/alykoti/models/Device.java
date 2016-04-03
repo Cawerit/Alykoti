@@ -158,57 +158,9 @@ public class Device implements IResource<Device> {
 					this.id = idRes.getInt(1);
 				}
 			}
-
-			//Seuraavat 2 updatea voidaan tehdä samalla transactionilla
-			boolean prevAutoCommitValue = conn.getAutoCommit();
-			conn.setAutoCommit(false);
-
-			try {
-
-				if (id != null && users.size() != 0) {
-					StringJoiner addUsers = new StringJoiner(",");
-					for (Object ignored : users)
-						addUsers.add("(" + id + ", ?)");
-
-					PreparedStatement addUsersStatement =
-							conn.prepareStatement("INSERT INTO device_users (device, user) VALUES " + addUsers.toString() + ";");
-
-					for (int i = 0, n = users.size(); i < n; i++)
-						addUsersStatement.setInt(i + 1, users.get(i).getId());
-
-					addUsersStatement.executeUpdate();
-				}
-
-				if (id != null && statuses.size() != 0) {
-					StringJoiner addStatuses = new StringJoiner(",");
-					Collection<DeviceStatus> statusValues = statuses.values();
-
-					for (Object ignored : statusValues)
-						addStatuses.add("(" + id + ", ?, ?, ?, NOW())");
-
-					PreparedStatement addStatusesStatement = conn.prepareStatement(
-							"INSERT INTO device_status (device, status_type, value_str, value_number, updated) " +
-									"VALUES " + addStatuses.toString() + ";");
-
-					int index = 0;
-					for (DeviceStatus s : statusValues) {
-						addStatusesStatement.setString(++index, s.statusType.toString());
-						addStatusesStatement.setString(++index, s.valueStr);
-						addStatusesStatement.setInt(++index, s.valueNumber);
-					}
-					System.out.println("Setting status for :"+id + "\n" + addStatusesStatement.toString());
-					addStatusesStatement.executeUpdate();
-				}
-
-
-				conn.commit();
-				conn.setAutoCommit(prevAutoCommitValue);
-
-			} finally {
-				try {
-					conn.setAutoCommit(prevAutoCommitValue);
-				} catch (Exception ignored){}
-			}
+			//Tietokannassa on after insert trigger joka lisää tälle oliolle lähtöstatukset
+			//Haetaan statukset jms lisätty data kannasta
+			this.pull();
 		}
 	}
 

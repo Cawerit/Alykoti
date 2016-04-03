@@ -48,6 +48,7 @@ public class RoomView extends AppView implements View {
 		content.setComponentAlignment(buttons, Alignment.TOP_CENTER);
 		roomAcccordion.setHeightUndefined();
 		roomAcccordion.setWidth("50%");
+		roomAcccordion.setHeight("500px");
 	}
 	
 	@Override

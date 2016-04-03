@@ -2,6 +2,7 @@ package com.example.alykoti.services;
 
 import com.example.alykoti.AlykotiUI;
 import com.example.alykoti.models.User;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.UI;
 
 import java.sql.*;
@@ -31,7 +32,7 @@ public class AuthService {
         return new User(username, role, id);
     }
 
-    public User login(String username, String password) throws SQLException {
+    public User login(String username, String password, UI ui) throws SQLException {
         try(
 				Connection conn = databaseService.getConnection();
             	PreparedStatement statement = conn.prepareStatement(LOGIN_STATEMENT)
@@ -41,7 +42,7 @@ public class AuthService {
             ResultSet result = statement.executeQuery();
             if (result.first()) {
                 User user = User.fromResultSet(result);
-                setCurrentUser(user);
+                setCurrentUser(user, ui);
                 new Thread(() -> {
                     //Asetetaan käyttäjä online (tämä voidaan hoitaa toisessa säikeessä ja siten
                     //antaa käyttäjän jatkaa sisäänkirjautumista vaikka häntä ei vielä olekaan merkattu online.
@@ -79,9 +80,9 @@ public class AuthService {
         }
     }
 
-    public void logout(){
+    public void logout(UI ui){
 		AuthService auth = AuthService.getInstance();
-		User current = auth.getCurrentUser();
+		User current = auth.getCurrentUser(ui);
 		if(current != null){
 			try {
 				//Päivitetään tieto ettei käyttäjä ole enää online
@@ -90,7 +91,7 @@ public class AuthService {
 				e.printStackTrace();
 			}
 		}
-		AlykotiUI.getCurrent();
+		VaadinSession.getCurrent().close();
 	}
 
     private static final String SIGNUP_STATEMENT =
@@ -124,16 +125,13 @@ public class AuthService {
 
     private static final String CURRENT_USER_SESSION_VAR = "CURRENT_USER";
 
-    public User getCurrentUser(){
-        UI ui = AlykotiUI.getCurrent();
-        Object value = ui.getSession().getAttribute(CURRENT_USER_SESSION_VAR);
+    public User getCurrentUser(UI ui){
+        Object value = VaadinSession.getCurrent().getAttribute(CURRENT_USER_SESSION_VAR);
         return value == null ? null : (User) value;
     }
 
-    private void setCurrentUser(User user){
-        System.out.println("Set current user");
-        UI ui = AlykotiUI.getCurrent();
-        ui.getSession().setAttribute(CURRENT_USER_SESSION_VAR, user);
+    private void setCurrentUser(User user, UI ui){
+        VaadinSession.getCurrent().setAttribute(CURRENT_USER_SESSION_VAR, user);
     }
 
     /**

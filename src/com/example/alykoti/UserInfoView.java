@@ -89,7 +89,7 @@ public class UserInfoView extends AppView {
 		try {
 			AuthService instance = AuthService.getInstance();
 			//Check fields with AuthService.login
-			if(username != null && password.equals(password2) && instance.login(user.getUsername(), oldPassword).equals(user)) {
+			if(username != null && password.equals(password2) && instance.login(user.getUsername(), oldPassword, this.getUI()).equals(user)) {
 				instance.updateUser(user.getId(), username, password);	
 				Notification.show("Username and/or password updated");
 			} else {

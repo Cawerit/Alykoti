@@ -17,7 +17,6 @@ import com.vaadin.ui.UI;
 
 import java.sql.SQLException;
 
-@PreserveOnRefresh
 @SuppressWarnings("serial")
 @Theme("alykoti")
 public class AlykotiUI extends UI {
@@ -33,24 +32,8 @@ public class AlykotiUI extends UI {
 	
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class, closeIdleSessions=true)
-	public static class Servlet extends VaadinServlet implements SessionDestroyListener {
+	public static class Servlet extends VaadinServlet {
 
-		@Override
-		public void sessionDestroy(SessionDestroyEvent event) {
-			System.out.println("Session destroy");
-			//Käyttäjän kirjautuessa ulos, merkataan tämä myös tietokantaan
-			//jotta muut käyttäjät näkevät
-			User u = AuthService.getInstance().getCurrentUser();
-			if(u != null){
-				System.out.println("Kirjataan käyttäjä " + u.getUsername() + " ulos");
-				//Tehtävä voidaan hoitaa toisessa säikeessä koska se ei ole niin kiireellinen
-				try {
-					u.isOnline(false);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 		
 	}
 

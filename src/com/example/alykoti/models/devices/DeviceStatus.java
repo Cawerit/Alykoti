@@ -1,6 +1,7 @@
 package com.example.alykoti.models.devices;
 
 import com.example.alykoti.components.SensorComponent;
+import com.example.alykoti.components.sensors.CheckboxComponent;
 import com.example.alykoti.components.sensors.SliderComponent;
 
 /**
@@ -34,7 +35,18 @@ public class DeviceStatus {
 	}
 
 	public SensorComponent toComponent(){
-		return new SliderComponent(this, 0, 100);
+		switch(statusType){
+			case BRIGHTNESS:
+			case TEMPERATURE:
+			case VOLUME:
+				return new SliderComponent(this, 0, 100);
+			case POWER:
+			case OPEN:
+			case LOCKED:
+				return new CheckboxComponent(this);
+			default:
+				return null;
+		}
 	}
 
 	public enum Type {
@@ -42,7 +54,9 @@ public class DeviceStatus {
 		BRIGHTNESS("BRIGHTNESS", "Kirkkaus"),
 		TEMPERATURE("TEMPERATURE", "Lämpotila"),
 		POWER("POWER", "Virta"),
-		VOLUME("VOLUME", "Äänenvoimakkuus");
+		VOLUME("VOLUME", "Äänenvoimakkuus"),
+		OPEN("OPEN", "Avoinna"),
+		LOCKED("LOCKED", "Lukossa");
 
 		private String sqlColumn;
 		private String translationFi;
