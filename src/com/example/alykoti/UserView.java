@@ -18,7 +18,7 @@ public class UserView extends VerticalLayout implements View {
 		bar.setWidth("100%");
 		Button logout = new Button("Logout");
 		logout.setIcon(FontAwesome.BACKWARD);
-        logout.addClickListener(click -> AlykotiUI.NAVIGATOR.navigateTo(""));
+        logout.addClickListener(click -> AlykotiUI.getCurrent().getNavigator().navigateTo(""));
         bar.addComponent(logout);
         addComponent(bar);
         bar.setComponentAlignment(logout, Alignment.TOP_RIGHT);        

@@ -21,10 +21,9 @@ import java.sql.SQLException;
 @Theme("alykoti")
 public class AlykotiUI extends UI {
 
-	public static Navigator NAVIGATOR;
+	private Navigator navigator;
 	//tyyppiturvallisuuden takia:
 	public static final String
-			ADMINTOP = "adminTop",
 			USERVIEW = "user",
 			ROOMVIEW = "room",
 			HOME_VIEW = "home",
@@ -39,22 +38,27 @@ public class AlykotiUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
-		
-		NAVIGATOR = new Navigator(this, this);
-		NAVIGATOR.addView("", new LoginView());
-		//NAVIGATOR.addView(ADMINTOP, new AdminTopView());
-		NAVIGATOR.addView(USERVIEW, new UserView());
-		NAVIGATOR.addView(ROOMVIEW, new RoomView());
-		NAVIGATOR.addView(HOME_VIEW, new HomeView());
-		NAVIGATOR.addView(ADMIN_DASHBOARD_VIEW, AdminDashboardView.class);
 
-		NAVIGATOR.setErrorView(new ErrorView());
+		navigator = new Navigator(this, this);
+		navigator.addView("", new LoginView());
+		//NAVIGATOR.addView(ADMINTOP, new AdminTopView());
+		navigator.addView(USERVIEW, new UserView());
+		navigator.addView(ROOMVIEW, new RoomView());
+		navigator.addView(HOME_VIEW, new HomeView());
+		navigator.addView(ADMIN_DASHBOARD_VIEW, AdminDashboardView.class);
+
+		navigator.setErrorView(new ErrorView());
 
 		setPollInterval(1000);
 		
 		setContent(new LoginView());
 		
-		}
+	}
+
+	public Navigator getNavigator(){
+		return navigator;
+	}
+
 }
 
 

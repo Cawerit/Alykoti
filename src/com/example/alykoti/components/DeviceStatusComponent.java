@@ -21,6 +21,7 @@ public class DeviceStatusComponent extends Table {
 		update();
 		setWidth("100%");
 		setHeightUndefined();
+		setHeightUndefined();
 	}
 
 	public void update(){

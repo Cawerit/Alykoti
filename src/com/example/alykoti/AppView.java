@@ -35,7 +35,7 @@ public class AppView extends VerticalLayout implements View {
         this.currentUser = AuthService.getInstance().getCurrentUser(this.getUI());
         System.out.println("Logged in user: " + currentUser);
         if(currentUser == null){
-            AlykotiUI.NAVIGATOR.navigateTo("");
+            AlykotiUI.getCurrent().getNavigator().navigateTo("");
         } else {
             HorizontalLayout newNavBar = currentUser.getRole() == AuthService.Role.ADMIN ? new AdminNavbar() : new HorizontalLayout();
             if(navBar == null){
@@ -50,7 +50,7 @@ public class AppView extends VerticalLayout implements View {
             settings.addItem("Profiili", FontAwesome.GEAR, null);//TODO: Käyttäjän asetussivu
             settings.addItem("Kirjaudu ulos", FontAwesome.SIGN_OUT, click -> {
                 AuthService.getInstance().logout(this.getUI());
-                AlykotiUI.NAVIGATOR.navigateTo("");
+                AlykotiUI.getCurrent().getNavigator().navigateTo("");
             });
             //Muutetaan navbarin käyttäjänhallinta
             navBar.addComponent(userSettings);
