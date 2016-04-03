@@ -3,7 +3,6 @@ package com.example.alykoti;
 import com.example.alykoti.components.AdminNavbar;
 import com.example.alykoti.models.User;
 import com.example.alykoti.services.AuthService;
-import com.sun.istack.internal.NotNull;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -46,7 +45,9 @@ public class AppView extends VerticalLayout implements View {
             MenuBar userSettings = new MenuBar();
             MenuBar.MenuItem settings = userSettings.addItem(currentUser.getUsername(), FontAwesome.USER, null);
             settings.setDescription("Käyttäjän asetukset");
-            settings.addItem("Profiili", FontAwesome.GEAR, null);//TODO: Käyttäjän asetussivu
+            settings.addItem("Profiili", FontAwesome.GEAR, click -> {
+            	AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERINFO + "/" + currentUser.getId());
+            });
             settings.addItem("Kirjaudu ulos", FontAwesome.SIGN_OUT, click -> {
                 AuthService.getInstance().logout();
                 AlykotiUI.NAVIGATOR.navigateTo("");

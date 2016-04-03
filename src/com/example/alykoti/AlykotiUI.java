@@ -22,7 +22,8 @@ public class AlykotiUI extends UI {
 			USERVIEW = "user",
 			ROOMVIEW = "room",
 			HOME_VIEW = "home",
-			ADMIN_DASHBOARD_VIEW = "admin-dashboard";
+			ADMIN_DASHBOARD_VIEW = "admin-dashboard",
+			USERINFO = "userinfo";
 	
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class)
@@ -36,12 +37,12 @@ public class AlykotiUI extends UI {
 		
 		NAVIGATOR = new Navigator(this, this);
 		NAVIGATOR.addView("", new LoginView());
-		//NAVIGATOR.addView(ADMINTOP, new AdminTopView());
 		NAVIGATOR.addView(USERVIEW, new UserView());
 		NAVIGATOR.addView(ROOMVIEW, new RoomView());
 		NAVIGATOR.addView(HOME_VIEW, new HomeView());
 		NAVIGATOR.addView(ADMIN_DASHBOARD_VIEW, AdminDashboardView.class);
-
+		NAVIGATOR.addView(USERINFO, new UserInfoView());
+		
 		NAVIGATOR.setErrorView(new ErrorView());
 
 		setPollInterval(1000);
