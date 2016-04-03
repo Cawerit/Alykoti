@@ -1,14 +1,16 @@
 package com.example.alykoti.models.devices;
 
+import com.example.alykoti.components.SensorComponent;
+
 /**
  * Listaa laitteiden mahdolliset tyypit
  */
 public enum DeviceType {
 
 	STEREO("STEREO"),
-	LAMP("LAMP", "lamppu"),
-	FRIDGE("FRIDGE", "jääkaappi"),
-	DOOR("DOOR", "sähköovi");
+	LAMP("LAMP", "Lamppu"),
+	FRIDGE("FRIDGE", "Jääkaappi"),
+	DOOR("DOOR", "Sähköovi");
 
 	private String sqlColumn;
 	private String translationFi;

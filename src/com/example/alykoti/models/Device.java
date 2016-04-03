@@ -3,18 +3,25 @@ package com.example.alykoti.models;
 import com.example.alykoti.models.devices.DeviceStatus;
 import com.example.alykoti.models.devices.DeviceType;
 import com.example.alykoti.services.DatabaseService;
+import com.example.alykoti.services.ObserverService;
 
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
-public class Device implements IResource<Device> {
+/**
+ * Sisältää tiedot laitteista. Toisin kuin muut tietokannasta datansa saavat luokat,
+ * tämä käyttää monta taulua yhdistävää näkymää lähteenään eikä siksi voi käyttää
+ * suoraan Resource-luokkaa pohjana vaan vaatii hieman lisätyötä käsitelläkseen dataa
+ * eri lähteistä.
+ */
+public class Device implements IResource<Device>, IUpdatable {
 
 	private Integer id;
 
 	private String name;
 	private DeviceType type;
 	private Integer room;
-	private java.sql.Date updated;
 	public final AbstractMap<DeviceStatus.Type, DeviceStatus> statuses = new HashMap<>();
 	public final List<User> users = new ArrayList<>();
 
@@ -25,7 +32,6 @@ public class Device implements IResource<Device> {
 		this(null);
 	}
 
-
 	@Override
 	public List<Device> query() throws SQLException {
 		//Rakennetaan query sen mukaan mitä dataa tässä oliossa on
@@ -33,7 +39,6 @@ public class Device implements IResource<Device> {
 		if(name != null) sql.add("name = ?");
 		if(type != null) sql.add("type = ?");
 		if(room != null) sql.add("room = ?");
-		if(updated != null) sql.add("updated > ?");
 
 		StringJoiner userIn = new StringJoiner(",");
 		for(Object o : users) userIn.add("?");
@@ -56,10 +61,7 @@ public class Device implements IResource<Device> {
 			if(name != null) statement.setString(++index, name);
 			if(type != null) statement.setString(++index, type.toString());
 			if(room != null) statement.setInt(++index, room);
-			if(updated != null) statement.setDate(++index, updated);
 			for(User u : users) statement.setInt(++index, u.getId());
-
-			System.out.println("Running query " + statement.toString());
 
 			return fromResultSet(statement.executeQuery());
 		}
@@ -83,12 +85,19 @@ public class Device implements IResource<Device> {
 				users.addAll(d.users);
 				name = d.name;
 				room = d.room;
-				updated = d.updated;
 			}
 		}
 	}
 
+	/**
+	 * Muodostaa listan device-olioita tietokannasta hetun ResultSetin pohjalta.
+	 * @param res
+	 * @return
+	 * @throws SQLException
+	 */
 	private static List<Device> fromResultSet(ResultSet res) throws SQLException {
+		//Titokannassa laitteet ovat näkymässä, jossa on laitteet, niiden käyttäjät ja niiden tila
+		//on yhdistetty joinilla. Rivien yhdistäminen järkevästi vaatii hieman lisäkikkailua.
 		List<Device> devices = new ArrayList<>();
 		Integer currentId = null;
 		Device d = null;
@@ -102,7 +111,6 @@ public class Device implements IResource<Device> {
 				currentId = nextId;
 				d.name = res.getString("name");
 				d.room = res.getInt("room");
-				d.updated = res.getDate("updated");
 				d.type = DeviceType.fromString(res.getString("type"));
 			}
 			Integer userId = res.getInt("userId");
@@ -111,17 +119,19 @@ public class Device implements IResource<Device> {
 				User u = new User();
 				u.setId(userId);
 				u.setUsername(res.getString("userName"));
+				u.setOnline(res.getBoolean("userOnline"));
 				d.users.add(u);
 			}
 			DeviceStatus.Type statusType = DeviceStatus.Type.fromString(res.getString("statusType"));
 			if(statusType != null && !d.statuses.containsKey(statusType)){
 				String valueStr = res.getString("statusValueStr");
 				Integer valueNumber = res.getInt("statusValueNumber");
+				long updated = res.getTimestamp("updated").getTime();
 				DeviceStatus status;
 				if(valueStr == null){
-					status = new DeviceStatus(statusType, valueNumber);
+					status = new DeviceStatus(statusType, valueNumber, updated);
 				} else {
-					status = new DeviceStatus(statusType, valueStr);
+					status = new DeviceStatus(statusType, valueStr, updated);
 				}
 				d.statuses.put(statusType, status);
 			}
@@ -145,68 +155,25 @@ public class Device implements IResource<Device> {
 					this.id = idRes.getInt(1);
 				}
 			}
-
-			//Seuraavat 2 updatea voidaan tehdä samalla transactionilla
-			boolean prevAutoCommitValue = conn.getAutoCommit();
-			conn.setAutoCommit(false);
-
-			try {
-
-				if (id != null && users.size() != 0) {
-					StringJoiner addUsers = new StringJoiner(",");
-					for (Object ignored : users)
-						addUsers.add("(" + id + ", ?)");
-
-					PreparedStatement addUsersStatement =
-							conn.prepareStatement("INSERT INTO device_users (device, user) VALUES " + addUsers.toString() + ";");
-
-					for (int i = 0, n = users.size(); i < n; i++)
-						addUsersStatement.setInt(i + 1, users.get(i).getId());
-
-					addUsersStatement.executeUpdate();
-				}
-
-				if (id != null && statuses.size() != 0) {
-					StringJoiner addStatuses = new StringJoiner(",");
-					Collection<DeviceStatus> statusValues = statuses.values();
-
-					for (Object ignored : statusValues)
-						addStatuses.add("(" + id + ", ?, ?, ?, NOW())");
-
-					PreparedStatement addStatusesStatement = conn.prepareStatement(
-							"INSERT INTO device_status (device, status_type, value_str, value_number, updated) " +
-									"VALUES " + addStatuses.toString() + ";");
-
-					int index = 0;
-					for (DeviceStatus s : statusValues) {
-						addStatusesStatement.setString(++index, s.statusType.toString());
-						addStatusesStatement.setString(++index, s.valueStr);
-						addStatusesStatement.setInt(++index, s.valueNumber);
-					}
-					System.out.println("Setting status for :"+id + "\n" + addStatusesStatement.toString());
-					addStatusesStatement.executeUpdate();
-				}
-
-
-				conn.commit();
-				conn.setAutoCommit(prevAutoCommitValue);
-
-			} finally {
-				try {
-					conn.setAutoCommit(prevAutoCommitValue);
-				} catch (Exception ignored){}
-			}
+			//Tietokannassa on after insert trigger joka lisää tälle oliolle lähtöstatukset
+			//Haetaan statukset jms lisätty data kannasta
+			this.pull();
 		}
 	}
-
+	/**
+	 * Vaihtaa laitteen tilaa
+	 * @param stat
+	 * @throws SQLException
+	 */
 	public void setStatus(DeviceStatus stat) throws SQLException {
 		statuses.put(stat.statusType, stat);
+		Timestamp updatedTimestamp = new Timestamp(stat.updated);
 		final String sql = "INSERT INTO device_status (device, status_type, value_str, value_number, updated) " +
-				"VALUES(?, ?, ?, ?, NOW()) " +
+				"VALUES(?, ?, ?, ?, ?) " +
 				"ON DUPLICATE KEY UPDATE " +
 				"value_str = ?," +
 				"value_number = ?," +
-				"updated = NOW();";
+				"updated = ?;";
 		try(
 				Connection conn = DatabaseService.getInstance().getConnection();
 				PreparedStatement statement = conn.prepareStatement(sql)
@@ -215,17 +182,30 @@ public class Device implements IResource<Device> {
 			statement.setString(2, stat.statusType.toString());
 			statement.setString(3, stat.valueStr);
 			statement.setInt(4, stat.valueNumber);
-			statement.setString(5, stat.valueStr);
-			statement.setInt(6, stat.valueNumber);
+			statement.setTimestamp(5, updatedTimestamp);
+			statement.setString(6, stat.valueStr);
+			statement.setInt(7, stat.valueNumber);
+			statement.setTimestamp(8, updatedTimestamp);
 			statement.executeUpdate();
+			notifyObservers();
 		}
 	}
 
+	/**
+	 * Antaa käyttäjälle oikeuden hallita laitteen tilaa
+	 * @param user
+	 * @throws SQLException
+	 */
 	public void addUser(User user) throws SQLException {
 		users.add(user);
 		executeUserUpdate("INSERT INTO device_users (device, user) VALUES(?, ?);", user);
 	}
 
+	/**
+	 * Poistaa annetulta käyttäjältä oikeuden hallita laitteen tilaa
+	 * @param user
+	 * @throws SQLException
+	 */
 	public void removeUser(User user) throws SQLException {
 		executeUserUpdate("DELETE FROM device_users WHERE device = ? AND user = ?", user);
 	}
@@ -248,9 +228,24 @@ public class Device implements IResource<Device> {
 				", name: " + this.name +
 				", status: " + Arrays.toString(this.statuses.values().toArray()) +
 				", users: " + users.toString() +
+				", updated: " + getUpdated() +
 				" }";
 	}
 
+	@Override
+	public boolean equals(Object o){
+		//System.out.println("no " + (oId == null ? getId() == null : oId.equals(getId())));
+		if(o != null && o instanceof Device){
+			Integer oId = ((Device) o).getId();
+			return oId == null ? getId() == null : oId.equals(getId());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
 
 	public void setRoom(Integer room){
 		this.room = room;
@@ -276,12 +271,26 @@ public class Device implements IResource<Device> {
 		this.name = name;
 	}
 
-	public java.sql.Date getUpdated() {
-		return updated;
+	@Override
+	public String getUniqueKey() {
+		return "device__" + getId();
 	}
 
-	public void setUpdated(java.sql.Date updated) {
-		this.updated = updated;
+	public long getUpdated() {
+		long max = 0L;
+		for(DeviceStatus stat : statuses.values()){
+			if(stat.updated > max){
+				max = stat.updated;
+			}
+		}
+		return max;
+	}
+
+	/**
+	 * Merkkaa tämän olion päivitetyksi ja ilmoittaa ObserverServicelle asiasta
+	 */
+	private void notifyObservers(){
+		ObserverService.getInstance().update(this);
 	}
 
 	public void setType(DeviceType type){

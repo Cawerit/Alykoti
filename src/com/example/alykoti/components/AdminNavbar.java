@@ -46,11 +46,11 @@ public class AdminNavbar extends HorizontalLayout {
     //Menu click handlers
     private void addUserToList(User u){
         users.addItem(u.getUsername(), null, (MenuItem selectedItem) -> {
-        	AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERINFO + "/" + u.getId());
+        	AlykotiUI.getCurrent().getNavigator().navigateTo(AlykotiUI.USERINFO + "/" + u.getId());
         });
     }
     private void addHomeToList(Home h) { homes.addItem(h.getName(), null, (MenuItem selectedItem) -> {
-        AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.HOME_VIEW + "/" + h.getId());
+        AlykotiUI.getCurrent().getNavigator().navigateTo(AlykotiUI.HOME_VIEW + "/" + h.getId());
     }); }
 
 }

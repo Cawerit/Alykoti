@@ -1,94 +1,105 @@
 package com.example.alykoti.components;
 
-import com.example.alykoti.models.Sensor;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.ProgressBar;
+import com.example.alykoti.AlykotiUI;
+import com.example.alykoti.models.Device;
+import com.example.alykoti.models.IUpdatable;
+import com.example.alykoti.models.devices.DeviceStatus;
+import com.example.alykoti.services.ObserverService;
+import com.vaadin.data.Property;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
+
+import java.sql.SQLException;
 
 /**
- * Widget that represents the state of a Sensor with a ProgressBar
- *
+ * Komponentti joka näyttää jonkin laitteen tilan progressbarilla tms
  */
-public class SensorComponent extends VerticalLayout {
-	private Sensor sensor;
-	private ProgressBar bar;
-	private HorizontalLayout buttons;
-	private HorizontalLayout sensorStatus;
-	private Button inc, dec;
-	private Label sensorValue;
-	private int currentValue, minValue, maxValue;
-	
-	/**
-	 * Add ProgressBar and Label to represent Sensor value and buttons to alter it
-	 * @param sensor the Sensor to represent
-	 */
-	public SensorComponent(Sensor sensor) {
-		this.sensor = sensor;
-		this.currentValue = sensor.getValue();
-		this.minValue = sensor.getMinValue();
-		this.maxValue = sensor.getMaxValue();
-		
-		bar = new ProgressBar(calibrateToBar(currentValue));
-		
-		inc = new Button();
-		inc.setIcon(FontAwesome.PLUS);
-		inc.addClickListener(new ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				changeValue(true);
-			}
-			
-		});		
-		dec = new Button();
-		dec.setIcon(FontAwesome.MINUS);
-		dec.addClickListener(new ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				changeValue(false);
-			}	
-		});
-		buttons = new HorizontalLayout();
-		buttons.addComponent(inc);
-		buttons.addComponent(dec);
-	
-		sensorStatus = new HorizontalLayout();
-		sensorValue = new Label(); 
-		sensorValue.setValue(currentValue + sensor.getSymbol());
-		sensorStatus.addComponent(bar);
-		sensorStatus.addComponent(sensorValue);
-		
-		addComponent(sensorStatus);
-		addComponent(buttons);
+public abstract class SensorComponent extends VerticalLayout {
 
+	private DeviceStatus status;
+	private Device dataSource;
+	private boolean followingValueChanges = false;
+
+	public SensorComponent(DeviceStatus status) {
+		super();
+		this.status = status;
 	}
-	
+
 	/**
-	 * Change the value of the represented Sensor
-	 * @param increase boolean to determine whether to increase or decrease value
+	 * Asettaa laitteen, johon tila perustuu. Tämä mahdollistaa esim
+	 * laitteen tilan päivittämisen, joten sen kutsuminen on yleensä tarpeeen.
 	 */
-	private void changeValue(boolean increase) {
-		currentValue = sensor.getValue();
-		int newValue = currentValue;
-		if(increase && currentValue < maxValue) newValue = currentValue + 1;
-		else if(currentValue > minValue) newValue = currentValue - 1;
-		float newBarValue = (calibrateToBar(newValue));
-		bar.setValue(newBarValue);
-		sensor.setValue(newValue);
-		sensorValue.setValue(newValue + sensor.getSymbol());
+	public void setDataSource(Device dataSource){
+		this.dataSource = dataSource;
+		if(!followingValueChanges){//Varmistetaan että listener asetetaan vain kerran
+			followingValueChanges = true;
+			//Luodaan päivittäjä joka päivittää sliderin tilan tietokantaan
+			getNotifier().addValueChangeListener(new ValueChangeListener());
+			((AlykotiUI) AlykotiUI.getCurrent()).subscribeObserver(dataSource, this::onNext);
 		}
-	
+	}
+
 	/**
-	 * Calibrate Sensor value to ProgressBar value
-	 * @param value the value of the Sensor
-	 * @return value to set to bar
+	 * Palauttaa komponentin joka säätää statuksen arvoa.
+	 * Tämä metodi on implementoitava jotta komponentin arvo voidaan "sitoa" tietokannan arvoon.
+	 * @return
 	 */
-	private float calibrateToBar(int value) {
-		return ((float) (value - minValue)) / ((float) (maxValue - minValue));
+	public abstract Property.ValueChangeNotifier getNotifier();
+
+	/**
+	 * Tämän metodin ylikirjoittamalla voidaan komponentin tilaa päivittää kun sen data muuttuu.
+	 */
+	protected abstract void onNext(DeviceStatus newStatus);
+
+	protected void onNext(){
+		try {
+			getDataSource().pull();
+			DeviceStatus newSatus = getDataSource().statuses.get(getStatus().statusType);
+			onNext(newSatus);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Tämä pitää ylikirjoittaa sen mukaan minkä tyyppistä dataa kyseisen sensorin komponentti lähettää.
+	 * Esim checkbox pitää sisällään boolean dataa, joten checkbox-komponentin on itse hoidettava muunnos
+	 * boolean -> DeviceStatus
+	 */
+	protected abstract DeviceStatus valueToStatus(Object value);
+
+	public Device getDataSource(){
+		return dataSource;
+	}
+
+	public DeviceStatus getStatus(){
+		return status;
+	}
+
+	public String getStatusName(){
+		String statusName = getStatus().statusType.toString("fi");
+		return statusName == null ? null : statusName.toLowerCase();
+	}
+
+	/**
+	 * Callback jota vaadin kutsuu kun komponentin arvo muuttuu, jolloin se voidaan päivittää
+	 * tietokantaan.
+	 */
+	private class ValueChangeListener implements Property.ValueChangeListener {
+		@Override
+		public void valueChange(Property.ValueChangeEvent valueChangeEvent) {
+			Object value = valueChangeEvent.getProperty().getValue();
+			Device currentDevice = getDataSource();
+			if(currentDevice != null){
+				//Statukset ovat käytännössä muuntumattomia objekteja, tehdään uusi tilalle
+				DeviceStatus newStatus = valueToStatus(value);
+				try {
+					currentDevice.setStatus(newStatus);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }
 

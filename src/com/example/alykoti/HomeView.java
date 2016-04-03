@@ -81,7 +81,7 @@ public class HomeView extends AppView {
 					e.printStackTrace();
 				}
 				if(firstRoomId == null) return;
-				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + firstRoomId);
+				AlykotiUI.getCurrent().getNavigator().navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + firstRoomId);
 			}
 		});
 		

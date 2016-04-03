@@ -32,8 +32,6 @@ public class RoomView extends AppView implements View {
 	private Button next = new Button();
 	public final Accordion roomAcccordion = new Accordion();
 	private Room room = new Room();
-	private Integer roomId = 0;
-	private Integer homeId = 0;
 	private final Label roomname = new Label();
 	
 	public RoomView() {
@@ -64,7 +62,7 @@ public class RoomView extends AppView implements View {
 			//Kodin ja huoneen id saadaan viimeisistä kahdesta url parametrista
 			String[] params = event.getParameters().split("/");
 			if(params.length < 2) {//fail, invalid url :(
-				AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMIN_DASHBOARD_VIEW);
+				AlykotiUI.getCurrent().getNavigator().navigateTo(AlykotiUI.ADMIN_DASHBOARD_VIEW);
 				return;
 			}
 			Integer homeId = Integer.parseInt(params[params.length-2]);
@@ -94,7 +92,7 @@ public class RoomView extends AppView implements View {
 				public void buttonClick(ClickEvent event) {
 					//siirry edelliseen huoneeseen
 					if(adjacent.getPrev() != null)
-						AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + adjacent.getPrev());
+						AlykotiUI.getCurrent().getNavigator().navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + adjacent.getPrev());
 				}
 			});
 			next.setCaption("Seuraava huone");
@@ -105,7 +103,7 @@ public class RoomView extends AppView implements View {
 				public void buttonClick(ClickEvent event) {
 					//siirry seuraavaan huoneeseen
 					if(adjacent.getNext() != null)
-						AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + adjacent.getNext());
+						AlykotiUI.getCurrent().getNavigator().navigateTo(AlykotiUI.ROOMVIEW + "/" + homeId + "/" + adjacent.getNext());
 				}
 			});
 
@@ -132,7 +130,7 @@ public class RoomView extends AppView implements View {
 	private void addToAccordion (Device d){
 		VerticalLayout tabContent = new VerticalLayout();
 		tabContent.setWidth("100%");
-		DeviceStatusComponent statusTable = new DeviceStatusComponent(d.statuses.values());
+		DeviceStatusComponent statusTable = new DeviceStatusComponent(d);
 		UserListComponent userlist = new UserListComponent(d);
 		tabContent.addComponent(statusTable);
 		tabContent.addComponent(userlist);

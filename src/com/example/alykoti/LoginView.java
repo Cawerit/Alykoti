@@ -30,14 +30,14 @@ public class LoginView extends VerticalLayout implements View {
 			public void buttonClick(ClickEvent event) {
                 User user = null;
                 try {
-                    user = AuthService.getInstance().login(username.getValue(), password.getValue());
+                    user = AuthService.getInstance().login(username.getValue(), password.getValue(), LoginView.this.getUI());
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
                 if(user != null){
 //                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMINTOP);
-                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMIN_DASHBOARD_VIEW);
-                    else AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERVIEW);
+                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.getCurrent().getNavigator().navigateTo(AlykotiUI.ADMIN_DASHBOARD_VIEW);
+                    else AlykotiUI.getCurrent().getNavigator().navigateTo(AlykotiUI.USERVIEW);
                 } else {
                     Notification.show("Kayttajatunnus tai salasana vaarin", Notification.Type.WARNING_MESSAGE);
                 }

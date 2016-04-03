@@ -11,7 +11,7 @@ public class ErrorView extends VerticalLayout implements View {
 
 	public ErrorView() {
 		Button back = new Button("Back");
-		back.addClickListener(click ->  AlykotiUI.NAVIGATOR.navigateTo(""));
+		back.addClickListener(click ->  AlykotiUI.getCurrent().getNavigator().navigateTo(""));
 		Label errorMessage = new Label("Sorry, requested resource not available");
 		addComponent(errorMessage);
 		addComponent(back);

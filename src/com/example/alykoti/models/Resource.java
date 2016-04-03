@@ -28,12 +28,10 @@ public abstract class Resource<T extends Resource> implements IResource<T> {
 
 	private final String tableName;
 	private Class<T> resourceType;
-
 	public Resource(@NotNull Class<T> resourceType, @NotNull String tableName){
 		this.resourceType = resourceType;
 		this.tableName = tableName;
 	}
-
 
 	@Target(value = ElementType.FIELD)
 	@Retention(value = RetentionPolicy.RUNTIME)
@@ -326,7 +324,7 @@ public abstract class Resource<T extends Resource> implements IResource<T> {
 	}
 
 	private void logQuery(PreparedStatement statement){
-		System.out.println("Ran query:\n" + statement.toString());
+		//System.out.println("Ran query:\n" + statement.toString());
 	}
 
 	private boolean synced = false;
@@ -355,5 +353,32 @@ public abstract class Resource<T extends Resource> implements IResource<T> {
 		}
 		return "{ id: " + getId() + ", " + result.toString() + " }";
 	}
+
+	/**
+	 * Kaksi Resource-objektia ovat samanlaiset jos niiden taulu ja id ovat samat
+	 * @param o
+	 * @return
+	 */
+	@Override
+	public boolean equals(Object o){
+		if(o != null && o instanceof Resource){
+			Resource r = (Resource) o;
+			Integer otherId = r.getId();
+			Integer myId = getId();
+			return (otherId == null ? myId == null : otherId.equals(myId))
+					&& r.tableName.equals(tableName);
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		int result = tableName.hashCode();
+		Integer id = getId();
+		result = 31 * result + (id != null ? id.hashCode() : 0);
+		return result;
+	}
+
 
 }

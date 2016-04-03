@@ -31,9 +31,9 @@ public class AppView extends VerticalLayout implements View {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        this.currentUser = AuthService.getInstance().getCurrentUser();
+        this.currentUser = AuthService.getInstance().getCurrentUser(this.getUI());
         if(currentUser == null){
-            AlykotiUI.NAVIGATOR.navigateTo("");
+            AlykotiUI.getCurrent().getNavigator().navigateTo("");
         } else {
             HorizontalLayout newNavBar = currentUser.getRole() == AuthService.Role.ADMIN ? new AdminNavbar() : new HorizontalLayout();
             if(navBar == null){
@@ -46,11 +46,11 @@ public class AppView extends VerticalLayout implements View {
             MenuBar.MenuItem settings = userSettings.addItem(currentUser.getUsername(), FontAwesome.USER, null);
             settings.setDescription("Käyttäjän asetukset");
             settings.addItem("Profiili", FontAwesome.GEAR, click -> {
-            	AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERINFO + "/" + currentUser.getId());
+            	AlykotiUI.getCurrent().getNavigator().navigateTo(AlykotiUI.USERINFO + "/" + currentUser.getId());
             });
             settings.addItem("Kirjaudu ulos", FontAwesome.SIGN_OUT, click -> {
-                AuthService.getInstance().logout();
-                AlykotiUI.NAVIGATOR.navigateTo("");
+                AuthService.getInstance().logout(this.getUI());
+                AlykotiUI.getCurrent().getNavigator().navigateTo("");
             });
             //Muutetaan navbarin käyttäjänhallinta
             navBar.addComponent(userSettings);
