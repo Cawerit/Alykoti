@@ -16,9 +16,6 @@ public class Room extends Resource<Room> {
 
 	private Integer id;
 
-	private ArrayList<Sensor> sensors;
-	private ArrayList<Item> items;
-
 	public Room(String name, Integer id){
 		super(Room.class, "rooms");
 		setName(name);
@@ -47,22 +44,6 @@ public class Room extends Resource<Room> {
 	
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public ArrayList<Sensor> getSensors() {
-		return sensors;
-	}
-
-	public void setSensors(ArrayList<Sensor> sensors) {
-		this.sensors = sensors;
-	}
-
-	public ArrayList<Item> getItems() {
-		return items;
-	}
-
-	public void setItems(ArrayList<Item> items) {
-		this.items = items;
 	}
 
 	public Integer getHomeId(){ return home; }

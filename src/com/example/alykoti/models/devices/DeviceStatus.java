@@ -1,5 +1,8 @@
 package com.example.alykoti.models.devices;
 
+import com.example.alykoti.components.SensorComponent;
+import com.example.alykoti.components.sensors.SliderComponent;
+
 /**
  * Wrapper-luokka laitteiden tilan hallintaan.
  * Laitteiden tila esitetään joko numeerisessa tai string-muodossa.
@@ -30,12 +33,16 @@ public class DeviceStatus {
 		return "{ " + statusType + ": " + value + " }";
 	}
 
+	public SensorComponent toComponent(){
+		return new SliderComponent(this, 0, 100);
+	}
+
 	public enum Type {
 
-		BRIGHTNESS("BRIGHTNESS", "kirkkaus"),
-		TEMPERATURE("TEMPERATURE", "lämpotila"),
-		POWER("POWER", "virta"),
-		VOLUME("VOLUME", "äänenvoimakkuus");
+		BRIGHTNESS("BRIGHTNESS", "Kirkkaus"),
+		TEMPERATURE("TEMPERATURE", "Lämpotila"),
+		POWER("POWER", "Virta"),
+		VOLUME("VOLUME", "Äänenvoimakkuus");
 
 		private String sqlColumn;
 		private String translationFi;
