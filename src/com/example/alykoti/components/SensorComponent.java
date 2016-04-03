@@ -1,7 +1,9 @@
 package com.example.alykoti.components;
 
+import com.example.alykoti.AlykotiUI;
 import com.example.alykoti.models.Device;
 import com.example.alykoti.models.devices.DeviceStatus;
+import com.example.alykoti.services.ObserverService;
 import com.vaadin.data.Property;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.VerticalLayout;
@@ -32,6 +34,7 @@ public abstract class SensorComponent extends VerticalLayout {
 			followingValueChanges = true;
 			//Luodaan päivittäjä joka päivittää sliderin tilan tietokantaan
 			getNotifier().addValueChangeListener(new ValueChangeListener());
+			((AlykotiUI) AlykotiUI.getCurrent()).subscribeObserver(dataSource, this::onNext);
 		}
 	}
 
@@ -41,6 +44,21 @@ public abstract class SensorComponent extends VerticalLayout {
 	 * @return
 	 */
 	public abstract Property.ValueChangeNotifier getNotifier();
+
+	/**
+	 * Tämän metodin ylikirjoittamalla voidaan komponentin tilaa päivittää kun sen data muuttuu.
+	 * @param newStatus Uusi laitteen tila
+	 */
+	public abstract void onNext(DeviceStatus newStatus);
+
+	private void onNext(Object o){
+		if(o != null && o instanceof Device){
+			Device changedDevice = (Device) o;
+			DeviceStatus newStatus = changedDevice.statuses.get(getStatus().statusType);
+			this.status = newStatus;
+			onNext(newStatus);
+		}
+	}
 
 	public Device getDataSource(){
 		return dataSource;
@@ -76,6 +94,8 @@ public abstract class SensorComponent extends VerticalLayout {
 					e.printStackTrace();
 				}
 			}
+			//Ilmoitetaan muille käyttäjille/näkymille muutoksesta
+			ObserverService.getInstance().update(currentDevice);
 		}
 	}
 }

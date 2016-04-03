@@ -163,7 +163,6 @@ public class Device implements IResource<Device> {
 			this.pull();
 		}
 	}
-
 	/**
 	 * Vaihtaa laitteen tilaa
 	 * @param stat
@@ -231,6 +230,20 @@ public class Device implements IResource<Device> {
 				" }";
 	}
 
+	@Override
+	public boolean equals(Object o){
+		//System.out.println("no " + (oId == null ? getId() == null : oId.equals(getId())));
+		if(o != null && o instanceof Device){
+			Integer oId = ((Device) o).getId();
+			return oId == null ? getId() == null : oId.equals(getId());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
 
 	public void setRoom(Integer room){
 		this.room = room;

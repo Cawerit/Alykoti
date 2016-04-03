@@ -33,7 +33,6 @@ public class AppView extends VerticalLayout implements View {
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         this.currentUser = AuthService.getInstance().getCurrentUser(this.getUI());
-        System.out.println("Logged in user: " + currentUser);
         if(currentUser == null){
             AlykotiUI.getCurrent().getNavigator().navigateTo("");
         } else {

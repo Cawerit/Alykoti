@@ -3,12 +3,15 @@ package com.example.alykoti;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.example.alykoti.models.Resource;
 import com.example.alykoti.models.User;
 import com.example.alykoti.services.AuthService;
+import com.example.alykoti.services.ObserverService;
 import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.navigator.Navigator;
+import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.SessionDestroyEvent;
 import com.vaadin.server.SessionDestroyListener;
 import com.vaadin.server.VaadinRequest;
@@ -22,6 +25,9 @@ import java.sql.SQLException;
 public class AlykotiUI extends UI {
 
 	private Navigator navigator;
+	//Tähän kerätään muutoksia seuraavien laitteiden lista
+	private ObserverService.ObserverCollection observers;
+
 	//tyyppiturvallisuuden takia:
 	public static final String
 			USERVIEW = "user",
@@ -49,14 +55,36 @@ public class AlykotiUI extends UI {
 
 		navigator.setErrorView(new ErrorView());
 
-		setPollInterval(1000);
+		//Hoidetaan muutosten observointi
+		setPollInterval(3000);
+		navigator.addViewChangeListener(new UpdateObservers());
+		addPollListener(pollEvent -> {
+			if(observers != null){
+				observers.update();
+			}
+		});
 		
 		setContent(new LoginView());
-		
+	}
+
+	public void subscribeObserver(Object r, ObserverService.IObserver observer){
+		observers.subscribe(r, observer);
 	}
 
 	public Navigator getNavigator(){
 		return navigator;
+	}
+
+	private class UpdateObservers implements ViewChangeListener {
+		@Override
+		public boolean beforeViewChange(ViewChangeEvent viewChangeEvent) {
+			//Luodaan uusi observerColleciton
+			observers = ObserverService.getInstance().createObserverCollection();
+			return true;
+		}
+		@Override
+		public void afterViewChange(ViewChangeEvent viewChangeEvent) {}
+
 	}
 
 }

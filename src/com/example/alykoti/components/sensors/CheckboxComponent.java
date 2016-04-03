@@ -13,7 +13,7 @@ public class CheckboxComponent extends SensorComponent {
 		super(status);
 		String statusName = getStatusName();
 		checkbox = new CheckBox();
-		checkbox.setValue(status.valueNumber == 1);
+		setValue(status.valueNumber);
 		checkbox.setDescription("Muuta " + statusName);
 		addComponent(checkbox);
 	}
@@ -21,5 +21,20 @@ public class CheckboxComponent extends SensorComponent {
 	@Override
 	public Property.ValueChangeNotifier getNotifier() {
 		return checkbox;
+	}
+
+	@Override
+	public void onNext(DeviceStatus newStatus) {
+		if(newStatus != null){
+			setValue(newStatus.valueNumber);
+		}
+	}
+
+	/**
+	 * DeviceStatus-oliot osaavat käsitellä statustaan vain stringeinä/numeroina,
+	 * joten muunnetaan numerosta booleaniksi ennen komponentin arvon muuttamista.
+	 */
+	private void setValue(int numericValue){
+		checkbox.setValue(numericValue == 1);
 	}
 }
