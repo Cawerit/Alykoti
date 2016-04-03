@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import com.example.alykoti.models.User;
 import com.example.alykoti.services.AuthService;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -23,9 +24,7 @@ public class UserInfoView extends AppView {
 	PasswordField pass1 = new PasswordField();
 	PasswordField pass2 = new PasswordField();
 	User user = new User();
-	HorizontalLayout buttons = new HorizontalLayout();
 	Button save = new Button("Save settings");
-	Button views = new Button("Manage user's views");
 	
 	/**
 	 * Create UserInfoView.
@@ -44,9 +43,9 @@ public class UserInfoView extends AppView {
 		panelContent.addComponent(old);
 		panelContent.addComponent(pass1);
 		panelContent.addComponent(pass2);
-		panelContent.addComponent(buttons);
-		buttons.addComponent(save);
-		buttons.addComponent(views);
+		panelContent.addComponent(save);
+		save.setClickShortcut(KeyCode.ENTER);
+		
 		userPanel.setContent(panelContent);
 		addComponent(userPanel);
 		panelContent.setComponentAlignment(username, Alignment.TOP_CENTER);

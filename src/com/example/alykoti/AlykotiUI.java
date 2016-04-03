@@ -34,7 +34,8 @@ public class AlykotiUI extends UI {
 			USERVIEW = "user",
 			ROOMVIEW = "room",
 			HOME_VIEW = "home",
-			ADMIN_DASHBOARD_VIEW = "admin-dashboard";
+			ADMIN_DASHBOARD_VIEW = "admin-dashboard",
+			USERINFO = "userinfo";
 	
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class, closeIdleSessions=true)
@@ -53,7 +54,7 @@ public class AlykotiUI extends UI {
 		navigator.addView(ROOMVIEW, new RoomView());
 		navigator.addView(HOME_VIEW, new HomeView());
 		navigator.addView(ADMIN_DASHBOARD_VIEW, AdminDashboardView.class);
-
+		navigator.addView(USERINFO, new UserInfoView());
 		navigator.setErrorView(new ErrorView());
 
 		//Hoidetaan muutosten observointi

@@ -28,7 +28,6 @@ public class AdminNavbar extends HorizontalLayout {
         homes = menuBar.addItem("Homes", FontAwesome.HOME, null);
         homes.setDescription("Manage homes");
         homes.addItem("Add home", FontAwesome.PLUS, new AddHomeCommand(this::addHomeToList));
-        //TODO: Hae tietokannasta kodit ja lisaa ne menuun
 
         users = menuBar.addItem("Users", FontAwesome.USERS, null);
         users.setDescription("Manage users");
@@ -46,7 +45,9 @@ public class AdminNavbar extends HorizontalLayout {
 
     //Menu click handlers
     private void addUserToList(User u){
-        users.addItem(u.getUsername(), null, (MenuItem selectedItem) -> {});
+        users.addItem(u.getUsername(), null, (MenuItem selectedItem) -> {
+        	AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERINFO + "/" + u.getId());
+        });
     }
     private void addHomeToList(Home h) { homes.addItem(h.getName(), null, (MenuItem selectedItem) -> {
         AlykotiUI.getCurrent().getNavigator().navigateTo(AlykotiUI.HOME_VIEW + "/" + h.getId());
