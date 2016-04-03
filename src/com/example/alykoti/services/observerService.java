@@ -41,7 +41,7 @@ public class ObserverService {
 				//System.out.println("Tutkitaan objektia " + o + " " + change.updatedAfter(after));
 			boolean result = change.updated > observer.updated;
 			if(result){
-				System.out.println("Has changes! " + change + " " + observer);
+				System.out.println("Found changes in " + change.key + "! Informing the observer.");
 			}
 			return result;
 		}
@@ -53,14 +53,9 @@ public class ObserverService {
 	 */
 	public void update(IUpdatable o){
 		synchronized (changedData) {
-			int index = findByKey(o.getUniqueKey());
-			if(index != -1){
-				changedData.get(index).updated = o.getUpdated();
-			} else {
-				changedData.add(new WrappedObservable(o.getUniqueKey(), o.getUpdated()));
-				if (changedData.size() > MAX_QUEUE_LENGTH) {
-					changedData.remove(0);
-				}
+			changedData.add(new WrappedObservable(o.getUniqueKey(), o.getUpdated()));
+			if (changedData.size() > MAX_QUEUE_LENGTH) {
+				changedData.remove(0);
 			}
 		}
 	}
@@ -119,25 +114,6 @@ public class ObserverService {
 		private void onNext(){
 			updated = new Date().getTime();
 			wrapped.onNext();
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-
-			WrappedObserver that = (WrappedObserver) o;
-			return equals(that);
-		}
-		public boolean equals(WrappedObserver o){
-			return wrapped.equals(o.wrapped) && key.equals(o.key);
-		}
-
-		@Override
-		public int hashCode() {
-			int result = wrapped.hashCode();
-			result = 31 * result + key.hashCode();
-			return result;
 		}
 	}
 
