@@ -5,6 +5,8 @@ import com.example.alykoti.models.devices.DeviceStatus;
 import com.vaadin.data.Property;
 import com.vaadin.ui.CheckBox;
 
+import java.util.Date;
+
 public class CheckboxComponent extends SensorComponent {
 
 	private final CheckBox checkbox;
@@ -29,6 +31,13 @@ public class CheckboxComponent extends SensorComponent {
 			setValue(newStatus.valueNumber);
 		}
 	}
+	@Override
+	protected DeviceStatus valueToStatus(Object newValue) {
+		//Vaadin slider palauttaa arvot doublena
+		int value = Boolean.TRUE.equals(newValue) ? 1 : 0;
+		return new DeviceStatus(getStatus().statusType, value, new Date().getTime());
+	}
+
 
 	/**
 	 * DeviceStatus-oliot osaavat käsitellä statustaan vain stringeinä/numeroina,

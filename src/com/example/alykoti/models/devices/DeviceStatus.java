@@ -13,17 +13,20 @@ public class DeviceStatus {
 	public final String valueStr;
 	public final Integer valueNumber;
 	public final Type statusType;
+	public final long updated;
 
-	public DeviceStatus(Type statusType, String value){
+	public DeviceStatus(Type statusType, String value, long updated){
 		this.statusType = statusType;
 		this.valueNumber = null;
 		this.valueStr = value;
+		this.updated = updated;
 	}
 
-	public DeviceStatus(Type statusType, Integer value){
+	public DeviceStatus(Type statusType, Integer value, long updated){
 		this.statusType = statusType;
 		valueNumber = value;
 		valueStr = null;
+		this.updated = updated;
 	}
 
 	@Override

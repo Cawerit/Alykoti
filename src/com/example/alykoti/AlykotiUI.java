@@ -3,6 +3,7 @@ package com.example.alykoti;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.example.alykoti.models.IUpdatable;
 import com.example.alykoti.models.Resource;
 import com.example.alykoti.models.User;
 import com.example.alykoti.services.AuthService;
@@ -67,7 +68,7 @@ public class AlykotiUI extends UI {
 		setContent(new LoginView());
 	}
 
-	public void subscribeObserver(Object r, ObserverService.IObserver observer){
+	public void subscribeObserver(IUpdatable r, ObserverService.IObserver observer){
 		observers.subscribe(r, observer);
 	}
 

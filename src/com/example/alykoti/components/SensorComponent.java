@@ -2,6 +2,7 @@ package com.example.alykoti.components;
 
 import com.example.alykoti.AlykotiUI;
 import com.example.alykoti.models.Device;
+import com.example.alykoti.models.IUpdatable;
 import com.example.alykoti.models.devices.DeviceStatus;
 import com.example.alykoti.services.ObserverService;
 import com.vaadin.data.Property;
@@ -49,11 +50,23 @@ public abstract class SensorComponent extends VerticalLayout {
 	 * Tämän metodin ylikirjoittamalla voidaan komponentin tilaa päivittää kun sen data muuttuu.
 	 * @param newStatus Uusi laitteen tila
 	 */
-	public abstract void onNext(DeviceStatus newStatus);
+	protected abstract void onNext(DeviceStatus newStatus);
 
-	private void onNext(Object o){
+	/**
+	 * Tämä pitää ylikirjoittaa sen mukaan minkä tyyppistä dataa kyseisen sensorin komponentti lähettää.
+	 * Esim checkbox pitää sisällään boolean dataa, joten checkbox-komponentin on itse hoidettava muunnos
+	 * boolean -> DeviceStatus
+	 */
+	protected abstract DeviceStatus valueToStatus(Object newValue);
+
+	private void onNext(IUpdatable o){
 		if(o != null && o instanceof Device){
 			Device changedDevice = (Device) o;
+			try {
+				changedDevice.pull();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 			DeviceStatus newStatus = changedDevice.statuses.get(getStatus().statusType);
 			this.status = newStatus;
 			onNext(newStatus);
@@ -82,20 +95,15 @@ public abstract class SensorComponent extends VerticalLayout {
 		public void valueChange(Property.ValueChangeEvent valueChangeEvent) {
 			Object value = valueChangeEvent.getProperty().getValue();
 			Device currentDevice = getDataSource();
-			DeviceStatus status = getStatus();
-			if(currentDevice != null && status != null && value != null){
+			if(currentDevice != null){
 				//Statukset ovat käytännössä muuntumattomia objekteja, tehdään uusi tilalle
-				DeviceStatus newStatus =
-						value instanceof Double ? new DeviceStatus(status.statusType, ((Double)value).intValue())
-					:	new DeviceStatus(status.statusType, (String) value);
+				DeviceStatus newStatus = valueToStatus(value);
 				try {
 					currentDevice.setStatus(newStatus);
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
 			}
-			//Ilmoitetaan muille käyttäjille/näkymille muutoksesta
-			ObserverService.getInstance().update(currentDevice);
 		}
 	}
 }
