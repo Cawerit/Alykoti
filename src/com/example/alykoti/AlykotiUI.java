@@ -38,7 +38,7 @@ public class AlykotiUI extends UI {
 			USERINFO = "userinfo";
 	
 	@WebServlet(value = "/*", asyncSupported = true)
-	@VaadinServletConfiguration(productionMode = false, ui = AlykotiUI.class, closeIdleSessions=true)
+	@VaadinServletConfiguration(productionMode = true, ui = AlykotiUI.class, closeIdleSessions=true)
 	public static class Servlet extends VaadinServlet {
 
 		
