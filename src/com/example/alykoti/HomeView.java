@@ -15,6 +15,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
@@ -24,19 +25,21 @@ import java.util.List;
 public class HomeView extends AppView {
 
     public final Accordion accordion = new Accordion();
-	//public final Label homeLabel = new Label();
+	public final Label homename = new Label();
 	public final VerticalLayout content = new VerticalLayout();
 	public final Panel homePanel = new Panel();
 	public final Button roomButton = new Button();
 	
     public HomeView(){
 		super(AuthService.Role.USER);
-		//addComponent(homeLabel);
 		content.setSizeFull();
+		addComponent(homename);
+		homename.setStyleName("h1");
 		homePanel.setSizeUndefined();
 		homePanel.setContent(accordion);
 		content.addComponent(homePanel);
 		content.addComponent(roomButton);
+		roomButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		content.setComponentAlignment(homePanel, Alignment.MIDDLE_CENTER);
 		content.setComponentAlignment(roomButton, Alignment.TOP_CENTER);
 		addComponent(content);
@@ -54,12 +57,12 @@ public class HomeView extends AppView {
 		TabSheet.Tab addRoomComponent = accordion.addTab(new RoomComponent(newRoom, (Room room) -> {
 			//Callback lisää uuden huoneen listaan
 			TabSheet.Tab newTab = accordion.addTab(new RoomComponent(room), room.getName());
-		}), "Lisää huone", FontAwesome.PLUS);
+		}), "Lis�� huone", FontAwesome.PLUS);
 		
         Home home = new Home(homeId);
 		try {
 			home.pull();//Päivitetään olion sisältö tietokannasta
-			homePanel.setCaption(home.getName());
+			homename.setValue(home.getName());
 			List<Room> rooms = home.getRooms();
 			for(Room r : rooms)
 				accordion.addTab(new RoomComponent(r), r.getName(), FontAwesome.HOME);
@@ -68,7 +71,7 @@ public class HomeView extends AppView {
 		}
 	
 		//Nappi, jolla siirrytään huonenäkymään
-		roomButton.setCaption("Open Room View");
+		roomButton.setCaption("Avaa huonen�kym�");
 		roomButton.setIcon(FontAwesome.EYE);
 		roomButton.addClickListener(new ClickListener(){
 			@Override

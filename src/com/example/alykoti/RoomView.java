@@ -20,6 +20,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.themes.ValoTheme;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -119,7 +120,8 @@ public class RoomView extends AppView implements View {
 				e.printStackTrace();
 			}
 
-			Button addDevice = new Button("Lis√§√§ laite", FontAwesome.PLUS);
+			Button addDevice = new Button("Lis‰‰ laite", FontAwesome.PLUS);
+			addDevice.setStyleName(ValoTheme.BUTTON_PRIMARY);
 			addDevice.addClickListener(new SaveDeviceCommand(roomId, this::addToAccordion));
 			buttons.addComponent(addDevice);
 
@@ -128,7 +130,10 @@ public class RoomView extends AppView implements View {
 		}
     }
 	
-	
+	/**
+	 * Adds a device component to rooms accordion
+	 * @param d device to add
+	 */
 	private void addToAccordion (Device d){
 		VerticalLayout tabContent = new VerticalLayout();
 		tabContent.setWidth("100%");

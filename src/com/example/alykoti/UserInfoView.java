@@ -6,25 +6,29 @@ import com.example.alykoti.models.User;
 import com.example.alykoti.services.AuthService;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.Button.ClickEvent;
 
 public class UserInfoView extends AppView {
 	Panel userPanel = new Panel();
 	VerticalLayout panelContent = new VerticalLayout();
+	Label usernameLabel = new Label();
 	TextField username = new TextField();
 	PasswordField old = new PasswordField();
 	PasswordField pass1 = new PasswordField();
 	PasswordField pass2 = new PasswordField();
 	User user = new User();
-	Button save = new Button("Save settings");
+	Button save = new Button("Tallenna muutokset");
 	
 	/**
 	 * Create UserInfoView.
@@ -32,11 +36,15 @@ public class UserInfoView extends AppView {
 	public UserInfoView() {
 		//TODO: Kayttajan roolin kysely:
 		super(AuthService.Role.ADMIN);
-		username.setCaption("Change username");
-		old.setCaption("Old password");
-		pass1.setCaption("New password");
-		pass2.setCaption("Repeat password");
-	
+		username.setCaption("K‰ytt‰j‰tunnus");
+		username.setIcon(FontAwesome.USER);
+		old.setCaption("Vanha salasana");
+		old.setIcon(FontAwesome.KEY);
+		pass1.setCaption("Uusi salasana");
+		pass1.setIcon(FontAwesome.KEY);
+		pass2.setCaption("Toista salasana");
+		pass2.setIcon(FontAwesome.KEY);
+		
 		userPanel.setSizeUndefined();
 		panelContent.setSizeFull();
 		panelContent.addComponent(username);
@@ -45,8 +53,11 @@ public class UserInfoView extends AppView {
 		panelContent.addComponent(pass2);
 		panelContent.addComponent(save);
 		save.setClickShortcut(KeyCode.ENTER);
-		
+		save.setIcon(FontAwesome.SAVE);
+		save.addStyleName(ValoTheme.BUTTON_PRIMARY);
 		userPanel.setContent(panelContent);
+		usernameLabel.setStyleName("h1");
+		addComponent(usernameLabel);
 		addComponent(userPanel);
 		panelContent.setComponentAlignment(username, Alignment.TOP_CENTER);
 		panelContent.setComponentAlignment(old, Alignment.TOP_CENTER);
@@ -65,7 +76,7 @@ public class UserInfoView extends AppView {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
-		userPanel.setCaption(user.getUsername());
+		usernameLabel.setValue(user.getUsername());
 		username.setValue(user.getUsername());
 		old.clear();
 		pass1.clear();
@@ -90,16 +101,16 @@ public class UserInfoView extends AppView {
 			//Check fields with AuthService.login
 			if(username != null && password.equals(password2) && instance.login(user.getUsername(), oldPassword).equals(user)) {
 				instance.updateUser(user.getId(), username, password);	
-				Notification.show("Username and/or password updated");
+				Notification.show("Tiedot p‰ivitetty");
 			} else {
-				Notification.show("Some fields filled incorrectly", Notification.Type.WARNING_MESSAGE);
+				Notification.show("Tarkasta sytt‰m‰si tiedot", Notification.Type.WARNING_MESSAGE);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			Notification.show("Error with connection", Notification.Type.WARNING_MESSAGE);
+			Notification.show("Yhteysvirhe", Notification.Type.WARNING_MESSAGE);
 		//If AuthService.login returns null:
 		} catch(NullPointerException e) {
-			Notification.show("Wrong password", Notification.Type.WARNING_MESSAGE);
+			Notification.show("V‰‰r‰ salasana", Notification.Type.WARNING_MESSAGE);
 		}
 	}
 }

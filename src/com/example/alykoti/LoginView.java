@@ -8,6 +8,7 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.themes.ValoTheme;
 
 import java.sql.SQLException;
 
@@ -16,15 +17,16 @@ public class LoginView extends VerticalLayout implements View {
     public LoginView() {
     	
     	setHeight("100%");
-        TextField username = new TextField("Username");
+        TextField username = new TextField("K‰ytt‰j‰tunnus");
         username.setIcon(FontAwesome.USER);
         username.focus();
 
-        PasswordField password = new PasswordField("Password");
+        PasswordField password = new PasswordField("Salasana");
         password.setIcon(FontAwesome.KEY);
         
-        Button loginButton = new Button("login");
+        Button loginButton = new Button("Kirjaudu sis‰‰n");
         loginButton.setIcon(FontAwesome.CHECK);    
+        loginButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
         loginButton.addClickListener(new Button.ClickListener() {
         	@Override
 			public void buttonClick(ClickEvent event) {
@@ -35,11 +37,10 @@ public class LoginView extends VerticalLayout implements View {
                     e.printStackTrace();
                 }
                 if(user != null){
-//                    if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMINTOP);
                     if(user.getRole() == AuthService.Role.ADMIN) AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.ADMIN_DASHBOARD_VIEW);
                     else AlykotiUI.NAVIGATOR.navigateTo(AlykotiUI.USERVIEW);
                 } else {
-                    Notification.show("Kayttajatunnus tai salasana vaarin", Notification.Type.WARNING_MESSAGE);
+                    Notification.show("Kayttajatunnus tai salasana v‰‰rin", Notification.Type.WARNING_MESSAGE);
                 }
 			}
         		
