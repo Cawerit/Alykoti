@@ -81,8 +81,7 @@ public class AuthService {
     }
 
     public void logout(UI ui){
-		AuthService auth = AuthService.getInstance();
-		User current = auth.getCurrentUser(ui);
+		User current = this.getCurrentUser(ui);
 		if(current != null){
 			try {
 				//Päivitetään tieto ettei käyttäjä ole enää online
@@ -91,7 +90,7 @@ public class AuthService {
 				e.printStackTrace();
 			}
 		}
-		VaadinSession.getCurrent().close();
+		ui.close();//Pyydetään Vaadinta lopettamaan sessio
 	}
 
     private static final String SIGNUP_STATEMENT =

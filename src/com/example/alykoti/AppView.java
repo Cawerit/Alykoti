@@ -32,7 +32,8 @@ public class AppView extends VerticalLayout implements View {
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         this.currentUser = AuthService.getInstance().getCurrentUser(this.getUI());
-        if(currentUser == null){
+        if(currentUser == null || !hasRights(currentUser.getRole())){
+            //Jos käyttäjä ei ole kirjautunut sisään tai hänellä ei ole oikeuksia tarkastella tätä näkymää, siirrytään kirjautumissivulle
             AlykotiUI.getCurrent().getNavigator().navigateTo("");
         } else {
             HorizontalLayout newNavBar = currentUser.getRole() == AuthService.Role.ADMIN ? new AdminNavbar() : new HorizontalLayout();
@@ -56,6 +57,14 @@ public class AppView extends VerticalLayout implements View {
             navBar.addComponent(userSettings);
             navBar.setComponentAlignment(userSettings, Alignment.MIDDLE_RIGHT);
         }
+    }
+
+
+    private boolean hasRights(AuthService.Role currentUserRole){
+        if(currentUserRole == null) return false;
+        if(currentUserRole.equals(AuthService.Role.ADMIN)) return true;//Adminilla on pääsy kaikkiin sivuihin
+        //Tavallinen käyttäjä pääsee näkymään jos niin on erikseen määritetty
+        return accessibleForRole == null || accessibleForRole.equals(AuthService.Role.USER);
     }
 
 }

@@ -20,8 +20,7 @@ public class DeviceStatusComponent extends Table {
 		this.device = device;
 		update();
 		setWidth("100%");
-		setHeightUndefined();
-		setHeightUndefined();
+		setPageLength(getItemIds().size()+1);
 	}
 
 	public void update(){

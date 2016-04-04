@@ -90,14 +90,20 @@ public abstract class Resource<T extends Resource> implements IResource<T> {
 		}
 	}
 
+	public List<T> query() throws SQLException {
+		return query(null);
+	}
+
 	/**
 	 * Hakee tietokannasta listan tämän Resourcen kaltaisia objekteja.
 	 * Jokainen tämän objektin Column-annotaatiolla varustettu luokkamuuttuja toimii AND-ehtona querylle.
 	 * Esimerkiksi jos tämän olion muuttuja "name" olisi "Jaska", haettaisiin tietokannasta kaikki Jaska-nimiset.
+	 * @param ids Query voidaan tehdä myös id:n perusteella natamalla tähän lista toivotuista id:stä. Tällöin hakua rajataan
+	 *            sekä id listalla että muilla olion arvoilla.
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<T> query() throws SQLException {
+	public List<T> query(List<Integer> ids) throws SQLException {
 		List<Field> fields = getColumnFields();
 		int fieldsSize = fields.size();
 		Object[] queryValues = new Object[fieldsSize];
@@ -118,16 +124,28 @@ public abstract class Resource<T extends Resource> implements IResource<T> {
 		} catch (IllegalAccessException e){
 			e.printStackTrace();
 		}
-		boolean hasParams = index > 0;
-		Connection conn = null;
-		try {
-			conn = DatabaseService.getInstance().getConnection();
-			String sql = "SELECT " + getColumnString(fields, true) + " FROM " + tableName;
-			if(hasParams) {
-				sql += " WHERE " + placeholders.toString() + ";";
-			} else sql += ";";
-			PreparedStatement statement = conn
-					.prepareStatement(sql);
+
+		boolean hasParams = index > 0;//Kysely vaatii WHERE-lauseen jos yllä lisättiin parametreja
+
+		if (ids != null) {
+			hasParams = true;
+			//Luodaan idstä lause "id IN (?,?,?)"
+			StringJoiner idPlaceholders = new StringJoiner(",");
+			for(Integer id : ids) idPlaceholders.add("?");
+			placeholders.add("id IN (" + idPlaceholders.toString() + ")");
+		}
+
+		//Nyt kaikki tarvittavat ?-parametrit on luotu PreparedStatementia varten.
+		//Muodostetaan suoritettava sql
+		String sql = "SELECT " + getColumnString(fields, true) + " FROM " + tableName;
+		if(hasParams) {
+			sql += " WHERE " + placeholders.toString() + ";";
+		} else sql += ";";
+
+		try(
+				Connection conn = DatabaseService.getInstance().getConnection();
+				PreparedStatement statement = conn.prepareStatement(sql)
+		){
 			if(hasParams) {
 				for (int i = 0; i < index; i++) {
 					Object value = queryValues[i];
@@ -135,6 +153,13 @@ public abstract class Resource<T extends Resource> implements IResource<T> {
 						break;
 					} else {
 						statement.setObject(i + 1, value, queryTypes[i]);
+					}
+				}
+				if(ids != null){
+					for(int i=0, n=ids.size(); i<n; i++){
+						//Huom! Tässä pitää huomioida että yllä asetetaan index-määrä parametreja
+						//ja näin ollen id parametrien kohdan laskenta pitää aloittaa kohdasta index
+						statement.setInt(index + i + 1, ids.get(i));
 					}
 				}
 			}
@@ -154,20 +179,12 @@ public abstract class Resource<T extends Resource> implements IResource<T> {
 					queryResults.add(obj);
 				}
 			} catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e){
+				//Devausvirheitä, eipä näihin kummemmin tarvitse UI:ssa asti ottaa kantaa
 				e.printStackTrace();
 			}
-
 			logQuery(statement);
 			return queryResults;
-
-		} finally {
-			if(conn != null) {
-				try {
-					conn.close();
-				} catch (Exception ignored){}
-			}
 		}
-
 	}
 
 	/**
