@@ -125,7 +125,7 @@ public class Device implements IResource<Device>, IUpdatable {
 			DeviceStatus.Type statusType = DeviceStatus.Type.fromString(res.getString("statusType"));
 			if(statusType != null && !d.statuses.containsKey(statusType)){
 				String valueStr = res.getString("statusValueStr");
-				Integer valueNumber = res.getInt("statusValueNumber");
+				Integer valueNumber = DatabaseService.getInteger(res, "statusValueNumber");
 				long updated = res.getTimestamp("updated").getTime();
 				DeviceStatus status;
 				if(valueStr == null){
@@ -141,10 +141,11 @@ public class Device implements IResource<Device>, IUpdatable {
 
 	@Override
 	public void create() throws SQLException {
-		try(Connection conn = DatabaseService.getInstance().getConnection()){
-			String createDeviceSql = "INSERT INTO devices (room, name, type) VALUES (?,?,?)";
-
-			PreparedStatement createStatement = conn.prepareStatement(createDeviceSql, Statement.RETURN_GENERATED_KEYS);
+		String createDeviceSql = "INSERT INTO devices (room, name, type) VALUES (?,?,?)";
+		try(
+				Connection conn = DatabaseService.getInstance().getConnection();
+				PreparedStatement createStatement = conn.prepareStatement(createDeviceSql, Statement.RETURN_GENERATED_KEYS)
+		){
 			createStatement.setInt(1, room);
 			createStatement.setString(2, name);
 			createStatement.setString(3, type.toString());
@@ -181,10 +182,10 @@ public class Device implements IResource<Device>, IUpdatable {
 			statement.setInt(1, getId());
 			statement.setString(2, stat.statusType.toString());
 			statement.setString(3, stat.valueStr);
-			statement.setInt(4, stat.valueNumber);
+			DatabaseService.setInteger(statement, 4, stat.valueNumber);
 			statement.setTimestamp(5, updatedTimestamp);
 			statement.setString(6, stat.valueStr);
-			statement.setInt(7, stat.valueNumber);
+			DatabaseService.setInteger(statement, 7, stat.valueNumber);
 			statement.setTimestamp(8, updatedTimestamp);
 			statement.executeUpdate();
 			notifyObservers();

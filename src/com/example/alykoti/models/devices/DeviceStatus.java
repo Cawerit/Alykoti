@@ -2,6 +2,7 @@ package com.example.alykoti.models.devices;
 
 import com.example.alykoti.components.SensorComponent;
 import com.example.alykoti.components.sensors.CheckboxComponent;
+import com.example.alykoti.components.sensors.CommentComponent;
 import com.example.alykoti.components.sensors.SliderComponent;
 
 /**
@@ -37,6 +38,10 @@ public class DeviceStatus {
 		return "{ " + statusType + ": " + value + " }";
 	}
 
+	/**
+	 * Yhdistää laitetyypit niiden UI esitykseen
+	 * @return
+	 */
 	public SensorComponent toComponent(){
 		switch(statusType){
 			case BRIGHTNESS:
@@ -47,6 +52,8 @@ public class DeviceStatus {
 			case OPEN:
 			case LOCKED:
 				return new CheckboxComponent(this);
+			case COMMENT:
+				return new CommentComponent(this);
 			default:
 				return null;
 		}
@@ -59,7 +66,8 @@ public class DeviceStatus {
 		POWER("POWER", "Virta"),
 		VOLUME("VOLUME", "Äänenvoimakkuus"),
 		OPEN("OPEN", "Avoinna"),
-		LOCKED("LOCKED", "Lukossa");
+		LOCKED("LOCKED", "Lukossa"),
+		COMMENT("COMMENT", "Kommentti laitteesta");
 
 		private String sqlColumn;
 		private String translationFi;

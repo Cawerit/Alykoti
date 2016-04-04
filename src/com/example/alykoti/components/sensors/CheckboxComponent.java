@@ -33,7 +33,7 @@ public class CheckboxComponent extends SensorComponent {
 	}
 	@Override
 	protected DeviceStatus valueToStatus(Object newValue) {
-		//Vaadin slider palauttaa arvot doublena
+		//Vaadin checkbox palauttaa arvot booleanina, DeviceStatus.Type vaatii Integerin
 		int value = Boolean.TRUE.equals(newValue) ? 1 : 0;
 		return new DeviceStatus(getStatus().statusType, value, new Date().getTime());
 	}
