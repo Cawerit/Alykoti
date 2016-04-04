@@ -88,9 +88,11 @@ public class ObserverService {
 		private final List<WrappedObserver> observers = new ArrayList<>();
 
 		public void update(){
+			List<String> updated = new ArrayList<>(observers.size());
 			for(WrappedObserver o : observers){
-				if(hasChanges(o)){
+				if(updated.indexOf(o.key) == -1 && hasChanges(o)){
 					o.onNext();
+					updated.add(o.key);
 				}
 			}
 		}
