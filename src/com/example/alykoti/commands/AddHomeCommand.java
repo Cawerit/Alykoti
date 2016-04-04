@@ -16,13 +16,13 @@ public class AddHomeCommand implements MenuBar.Command {
 
     @Override
     public void menuSelected(MenuBar.MenuItem menuItem) {
-        Window subWindow = new Window("Add home");
+        Window subWindow = new Window("Lisää koti");
         VerticalLayout subContent = new VerticalLayout();
         subContent.setMargin(true);
         subWindow.setContent(subContent);
-        TextField housename = new TextField("House name");
+        TextField housename = new TextField("Älykodin nimi");
         subContent.addComponent(housename);
-        Button add = new Button("Add");
+        Button add = new Button("Tallenna");
         add.addClickListener(new Button.ClickListener() {
 
             @Override

@@ -25,13 +25,13 @@ public class AdminNavbar extends HorizontalLayout {
         setWidth("100%");
         MenuBar menuBar = new MenuBar();
 
-        homes = menuBar.addItem("Homes", FontAwesome.HOME, null);
-        homes.setDescription("Manage homes");
-        homes.addItem("Add home", FontAwesome.PLUS, new AddHomeCommand(this::addHomeToList));
+        homes = menuBar.addItem("Kodit", FontAwesome.HOME, null);
+        homes.setDescription("Muokkaa älykoteja");
+        homes.addItem("Lisää koti", FontAwesome.PLUS, new AddHomeCommand(this::addHomeToList));
 
-        users = menuBar.addItem("Users", FontAwesome.USERS, null);
-        users.setDescription("Manage users");
-        users.addItem("Add user", FontAwesome.PLUS, new AddUserCommand(this::addUserToList));
+        users = menuBar.addItem("Käyttäjät", FontAwesome.USERS, null);
+        users.setDescription("Hallitse käyttäjiä");
+        users.addItem("Lisää käyttäjä", FontAwesome.PLUS, new AddUserCommand(this::addUserToList));
 
         try {
             new User().query().forEach(this::addUserToList);

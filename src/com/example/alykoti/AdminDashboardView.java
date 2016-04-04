@@ -1,5 +1,6 @@
 package com.example.alykoti;
 
+import com.example.alykoti.models.User;
 import com.example.alykoti.models.devices.DeviceStatus;
 import com.example.alykoti.models.devices.StatusChangeSummary;
 import com.example.alykoti.services.AuthService;
@@ -20,11 +21,14 @@ import java.util.List;
 public class AdminDashboardView extends AppView {
 
 	private final Layout container = new VerticalLayout();
+	private final Label welcome = new Label();
 
     public AdminDashboardView() {
         super(AuthService.Role.ADMIN);
 		Label header = new Label("Viimeisimmät muutokset");
 		header.setStyleName("h3");
+		welcome.setStyleName("h2");
+		addComponent(welcome);
 		addComponent(header);
 		addComponent(container);
 		setMargin(true);
@@ -35,6 +39,14 @@ public class AdminDashboardView extends AppView {
 		super.enter(event);
 		container.removeAllComponents();
 		List<StatusChangeSummary> prevChanges = null;
+
+		User current = AuthService.getInstance().getCurrentUser(this.getUI());
+		if(current != null){
+			welcome.setValue("Tervetuloa admin-näkymään, " + current.getUsername() + "!");
+		} else {
+			welcome.setValue("");
+		}
+
 		try {
 			prevChanges = new StatusChangeSummary().query();
 		} catch (SQLException e) {

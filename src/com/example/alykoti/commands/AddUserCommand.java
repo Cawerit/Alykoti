@@ -18,14 +18,14 @@ public class AddUserCommand implements MenuBar.Command {
 
     @Override
     public void menuSelected(MenuBar.MenuItem menuItem) {
-        Window subWindow = new Window("Add user");
+        Window subWindow = new Window("Lisää käyttäjä");
         VerticalLayout subContent = new VerticalLayout();
         subContent.setMargin(true);
         subWindow.setContent(subContent);
 
-        TextField username = new TextField("Username");
-        TextField password = new TextField("Password");
-        CheckBox setAsAdmin = new CheckBox("Set as administrator");
+        TextField username = new TextField("Käyttäjänimi");
+        TextField password = new TextField("Salasana");
+        CheckBox setAsAdmin = new CheckBox("Käyttäjä on admin");
         subContent.addComponent(username);
         subContent.addComponent(password);
         subContent.addComponent(setAsAdmin);
@@ -42,7 +42,7 @@ public class AddUserCommand implements MenuBar.Command {
                     String pwd = password.getValue();
 
                     if(User.usernameExists(usr)){
-                        Notification.show("Käyttäjänimi on jo varattu");
+                        Notification.show("Käyttäjänimi on jo varattu!");
                         return;
                     }
 

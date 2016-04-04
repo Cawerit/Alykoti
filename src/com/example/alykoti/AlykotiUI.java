@@ -13,14 +13,12 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.SessionDestroyEvent;
-import com.vaadin.server.SessionDestroyListener;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.*;
 import com.vaadin.ui.UI;
 
 import java.sql.SQLException;
 
+@PreserveOnRefresh
 @SuppressWarnings("serial")
 @Theme("alykoti")
 public class AlykotiUI extends UI {
@@ -65,7 +63,9 @@ public class AlykotiUI extends UI {
 				observers.update();
 			}
 		});
-		
+		//Vähennetään session pituutta ja kirjataan nopeammin ulos inaktiiviset käyttäjät
+		VaadinSession.getCurrent().getSession().setMaxInactiveInterval(30);
+
 		setContent(new LoginView());
 	}
 
@@ -93,7 +93,7 @@ public class AlykotiUI extends UI {
 	 * Ylikirjoitetaan close-metodi siten, että kirjataan käyttäjä samalla ulos
 	 */
 	@Override
-	public void close(){
+	public void detach(){
 		User u = AuthService.getInstance().getCurrentUser(this);
 		if(u != null){
 			try {
@@ -103,7 +103,7 @@ public class AlykotiUI extends UI {
 				e.printStackTrace();
 			}
 		}
-		super.close();
+		super.detach();
 	}
 
 }
