@@ -34,8 +34,7 @@ public class SaveDeviceCommand implements Button.ClickListener {
 		subContent.addComponent(deviceName);
 		ListSelect deviceTypes = new ListSelect("Laitteen tyyppi");
 		for(DeviceType val : DeviceType.values()){
-			Object key = deviceTypes.addItem(val);
-			deviceTypes.setItemCaption(key, val.toString("fi"));
+			deviceTypes.addItem(new DeviceTypeWrapper(val));
 		}
 		deviceTypes.setWidth("100%");
 		deviceTypes.setNullSelectionAllowed(false);
@@ -45,7 +44,7 @@ public class SaveDeviceCommand implements Button.ClickListener {
 			editDevice.setName(deviceName.getValue());
 			Object deviceType = deviceTypes.getValue();
 			if(deviceType != null){
-				editDevice.setType((DeviceType) deviceType);
+				editDevice.setType(((DeviceTypeWrapper) deviceType).getValue());
 			} else return;
 			try {
 				editDevice.create();
@@ -62,4 +61,22 @@ public class SaveDeviceCommand implements Button.ClickListener {
 		subWindow.center();
 		UI.getCurrent().addWindow(subWindow);
 	}
+
+	/**
+	 * Pieni apuluokka joka ylikirjoittaa toString-metodin DeviceType-luokasta niin että saadaan selkokielinen teksti listaan.
+	 */
+	private class DeviceTypeWrapper {
+		private final DeviceType value;
+		public DeviceTypeWrapper(DeviceType value){
+			this.value = value;
+		}
+		@Override
+		public String toString(){
+			return value.toString("fi");
+		}
+		public DeviceType getValue(){
+			return value;
+		}
+	}
+
 }
