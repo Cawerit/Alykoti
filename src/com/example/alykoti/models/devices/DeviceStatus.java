@@ -66,7 +66,7 @@ public class DeviceStatus {
 		POWER("POWER", "Virta"),
 		VOLUME("VOLUME", "Äänenvoimakkuus"),
 		OPEN("OPEN", "Avoinna"),
-		LOCKED("LOCKED", "Lukossa"),
+		LOCKED("LOCKED", "Lukitus"),
 		COMMENT("COMMENT", "Kommentti laitteesta");
 
 		private String sqlColumn;

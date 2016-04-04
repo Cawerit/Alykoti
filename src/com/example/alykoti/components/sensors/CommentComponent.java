@@ -24,7 +24,7 @@ public class CommentComponent extends SensorComponent {
 		addComponent(text);
 		text.setValue(status.valueStr);
 		text.setMaxLength(400);
-		text.setHeight("200px");
+		text.setHeight("90px");
 		text.setWidth("100%");
 	}
 

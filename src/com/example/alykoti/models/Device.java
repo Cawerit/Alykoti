@@ -7,7 +7,6 @@ import com.example.alykoti.services.ObserverService;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Sisältää tiedot laitteista. Toisin kuin muut tietokannasta datansa saavat luokat,

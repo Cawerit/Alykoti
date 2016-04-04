@@ -89,6 +89,23 @@ public class AlykotiUI extends UI {
 
 	}
 
+	/**
+	 * Ylikirjoitetaan close-metodi siten, että kirjataan käyttäjä samalla ulos
+	 */
+	@Override
+	public void close(){
+		User u = AuthService.getInstance().getCurrentUser(this);
+		if(u != null){
+			try {
+				System.out.println("Logging out user " + u.getId());
+				u.isOnline(false);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		super.close();
+	}
+
 }
 
 

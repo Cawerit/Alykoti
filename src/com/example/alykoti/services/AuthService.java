@@ -81,15 +81,6 @@ public class AuthService {
     }
 
     public void logout(UI ui){
-		User current = this.getCurrentUser(ui);
-		if(current != null){
-			try {
-				//Päivitetään tieto ettei käyttäjä ole enää online
-				current.isOnline(false);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
 		ui.close();//Pyydetään Vaadinta lopettamaan sessio
 	}
 

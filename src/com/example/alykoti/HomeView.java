@@ -17,6 +17,7 @@ import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.themes.ValoTheme;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -68,8 +69,9 @@ public class HomeView extends AppView {
 		}
 	
 		//Nappi, jolla siirrytään huonenäkymään
-		roomButton.setCaption("Open Room View");
+		roomButton.setCaption("Tarkastele kotia");
 		roomButton.setIcon(FontAwesome.EYE);
+		roomButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		roomButton.addClickListener(new ClickListener(){
 			@Override
 			public void buttonClick(ClickEvent event) {

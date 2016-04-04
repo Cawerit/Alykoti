@@ -398,4 +398,13 @@ public abstract class Resource<T extends Resource> implements IResource<T> {
 	}
 
 
+//	private void setValue(PreparedStatement statement, int index, Object value, int type) throws SQLException {
+//		if(Types.INTEGER == type){
+//			DatabaseService.setInteger(statement, index, (Integer) value);
+//		} else {
+//			statement.setObject(index);
+//		}
+//	}
+
+
 }
