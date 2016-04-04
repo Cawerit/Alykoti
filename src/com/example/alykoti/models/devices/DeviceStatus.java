@@ -44,8 +44,9 @@ public class DeviceStatus {
 	 */
 	public SensorComponent toComponent(){
 		switch(statusType){
-			case BRIGHTNESS:
 			case TEMPERATURE:
+				return new SliderComponent(this, -10, 20);
+			case BRIGHTNESS:
 			case VOLUME:
 				return new SliderComponent(this, 0, 100);
 			case POWER:

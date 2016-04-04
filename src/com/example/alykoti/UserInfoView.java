@@ -30,12 +30,11 @@ public class UserInfoView extends AppView {
 	 * Create UserInfoView.
 	 */
 	public UserInfoView() {
-		//TODO: Kayttajan roolin kysely:
-		super(AuthService.Role.ADMIN);
-		username.setCaption("Change username");
-		old.setCaption("Old password");
-		pass1.setCaption("New password");
-		pass2.setCaption("Repeat password");
+		super(AuthService.Role.USER);
+		username.setCaption("Vaihda käyttäjänimi");
+		old.setCaption("Vanha salasana");
+		pass1.setCaption("Uusi salasana");
+		pass2.setCaption("Toista salasana");
 	
 		userPanel.setSizeUndefined();
 		panelContent.setSizeFull();
